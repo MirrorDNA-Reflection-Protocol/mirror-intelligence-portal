@@ -1247,7 +1247,7 @@ function initLiveTerminal() {
     uptimeEl.textContent = `${mins}:${secs}`;
   }, 1000);
 
-  // Activity Graph Animation
+  // Activity Graph Animation — Multi-agent layered waveforms
   const canvas = document.getElementById('activity-graph');
   if (canvas) {
     const ctx = canvas.getContext('2d');
@@ -1255,46 +1255,99 @@ function initLiveTerminal() {
     canvas.height = canvas.offsetHeight * 2;
     ctx.scale(2, 2);
 
-    let dataPoints = new Array(100).fill(10);
+    // Agent colors (matching their signal colors)
+    const agents = [
+      { id: 'gpt', color: '#5eaab5', data: new Array(100).fill(15) },      // Cyan
+      { id: 'deepseek', color: '#4a8c6f', data: new Array(100).fill(12) }, // Green
+      { id: 'groq', color: '#c4a35a', data: new Array(100).fill(10) },     // Gold
+      { id: 'mistral', color: '#b38a4a', data: new Array(100).fill(8) },   // Amber
+      { id: 'swarm', color: '#a162f7', data: new Array(100).fill(6) }      // Violet
+    ];
+
+    let frame = 0;
 
     function drawGraph() {
       const w = canvas.offsetWidth;
       const h = canvas.offsetHeight;
 
-      ctx.clearRect(0, 0, w, h);
+      // Clear with slight fade for trailing effect
+      ctx.fillStyle = 'rgba(0, 10, 0, 0.15)';
+      ctx.fillRect(0, 0, w, h);
 
-      // Add new data point
-      const newVal = Math.random() * 40 + 5;
-      dataPoints.push(newVal);
-      if (dataPoints.length > 100) dataPoints.shift();
+      frame++;
 
-      // Draw grid lines
-      ctx.strokeStyle = '#1a2a1a';
+      // Update each agent's data with unique wave patterns
+      agents.forEach((agent, agentIdx) => {
+        // Generate unique wave pattern per agent
+        const phase = frame * 0.02 + agentIdx * 0.5;
+        const baseWave = Math.sin(phase) * 15 + 20;
+        const noise = (Math.random() - 0.5) * 10;
+        const spike = Math.random() > 0.95 ? Math.random() * 30 : 0; // Random spikes
+
+        agent.data.push(baseWave + noise + spike);
+        if (agent.data.length > 100) agent.data.shift();
+      });
+
+      // Draw faint grid
+      ctx.strokeStyle = 'rgba(30, 60, 30, 0.3)';
       ctx.lineWidth = 0.5;
-      for (let i = 0; i < 5; i++) {
-        const y = (h / 5) * i;
+      for (let i = 1; i < 4; i++) {
+        const y = (h / 4) * i;
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(w, y);
         ctx.stroke();
       }
 
-      // Draw waveform
-      ctx.strokeStyle = '#0f0';
-      ctx.lineWidth = 1;
-      ctx.shadowColor = '#0f0';
-      ctx.shadowBlur = 4;
-      ctx.beginPath();
+      // Draw each agent's waveform (back to front for layering)
+      agents.slice().reverse().forEach((agent, revIdx) => {
+        const idx = agents.length - 1 - revIdx;
 
-      dataPoints.forEach((val, i) => {
-        const x = (i / dataPoints.length) * w;
-        const y = h - (val / 50) * h;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        // Create gradient fill
+        const gradient = ctx.createLinearGradient(0, 0, 0, h);
+        gradient.addColorStop(0, agent.color + '40'); // 25% opacity at top
+        gradient.addColorStop(1, agent.color + '05'); // 2% opacity at bottom
+
+        // Draw filled area
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+
+        agent.data.forEach((val, i) => {
+          const x = (i / agent.data.length) * w;
+          const y = h - (val / 70) * h;
+          ctx.lineTo(x, y);
+        });
+
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // Draw glowing line on top
+        ctx.beginPath();
+        agent.data.forEach((val, i) => {
+          const x = (i / agent.data.length) * w;
+          const y = h - (val / 70) * h;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+
+        ctx.strokeStyle = agent.color;
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = agent.color;
+        ctx.shadowBlur = 6;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
       });
 
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+      // Draw agent labels at the right edge
+      ctx.font = '8px JetBrains Mono, monospace';
+      agents.forEach((agent, idx) => {
+        const lastVal = agent.data[agent.data.length - 1];
+        const y = h - (lastVal / 70) * h;
+        ctx.fillStyle = agent.color;
+        ctx.fillText(agent.id.toUpperCase(), w - 45, y + 3);
+      });
 
       requestAnimationFrame(drawGraph);
     }
