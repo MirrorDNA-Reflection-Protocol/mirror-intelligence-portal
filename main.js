@@ -59,6 +59,42 @@ async function loadData() {
 let currentPage = 'home';
 let currentTopic = new Date().getDay();
 let realityUpdatedAt = new Date();
+let userState = {
+  lastVisit: null,
+  visitCount: 0,
+  streak: 0
+};
+
+// Initialize User Memory
+try {
+  const stored = localStorage.getItem('mirror_user_state');
+  if (stored) {
+    userState = JSON.parse(stored);
+
+    // Check for streak (visit within 24-48h of last)
+    const now = new Date();
+    const last = new Date(userState.lastVisit);
+    const diffHours = (now - last) / (1000 * 60 * 60);
+
+    if (diffHours > 24 && diffHours < 48) {
+      userState.streak++;
+    } else if (diffHours > 48) {
+      userState.streak = 1; // Reset streak if missed a day
+    }
+    // If < 24h, streak remains same (don't increment for multiple visits same day)
+  } else {
+    userState.streak = 1;
+    userState.visitCount = 1;
+  }
+
+  // Update visit time immediate
+  userState.lastVisit = new Date().toISOString();
+  userState.visitCount++;
+  localStorage.setItem('mirror_user_state', JSON.stringify(userState));
+
+} catch (e) {
+  console.warn('User memory disabled (privacy/error)', e);
+}
 
 // Topic schedule — each day has meaning
 const TOPICS = {
@@ -373,6 +409,7 @@ function renderHeader() {
         <div class="reality-status">
           <span class="reality-pulse"></span>
           <span id="reality-age">Reality updated ${formatRealityAge()}</span>
+          ${userState.streak > 1 ? `<span class="streak-badge" title="${userState.streak} day streak">• ${userState.streak}d streak</span>` : ''}
         </div>
         
         <nav>
