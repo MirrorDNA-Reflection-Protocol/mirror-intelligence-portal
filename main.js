@@ -13,6 +13,46 @@
 import './style.css'
 
 // ═══════════════════════════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════════════════════════
+
+let BRIEFINGS = {};
+let PREDICTIONS = [];
+let DATA_LOADED = false;
+
+async function loadData() {
+  try {
+    const resp = await fetch('/data.json');
+    if (resp.ok) {
+      const data = await resp.json();
+      console.log('⟡ Loaded dynamic data:', data);
+
+      // Transform incoming single day briefing into the schedule format
+      // Note: In a real system, we'd fetch the full schedule.
+      // Here we map the dynamic brief to the CURRENT topic/day.
+
+      const day = new Date().getDay();
+
+      BRIEFINGS[day] = {
+        date: data.meta.date,
+        sources: data.briefing.stats.sources,
+        models: data.briefing.stats.models,
+        headline: data.briefing.headline,
+        subline: data.briefing.subline,
+        summary: data.briefing.summary,
+        sections: data.briefing.sections
+      };
+
+      PREDICTIONS = data.predictions;
+      DATA_LOADED = true;
+      render();
+    }
+  } catch (e) {
+    console.error('Failed to load dynamic data, using static snapshot:', e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
 
@@ -32,6 +72,39 @@ const TOPICS = {
 };
 
 const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+// Map legacy static data structure to BRIEFINGS until data loads
+BRIEFINGS = {
+  1: {
+    date: 'January 6, 2026',
+    updated: new Date(),
+    sources: 8,
+    models: 4,
+    headline: 'The Industry Pivots from Spectacle to Substance',
+    subline: 'CES 2026 is quiet. That is the point.',
+    summary: 'The era of "AI Magic" marketing is over. As compute costs stabilize and consumer fatigue sets in, the major players (Apple, Google, OpenAI) are shifting focus to "invisible intelligence"—deep integration, battery efficiency, and institutional reliability. The noise has collapsed; the signal is operational depth.',
+    sections: {
+      changed: [
+        { text: "OpenAI announces 'Sovereign-Lite' tiers for enterprise (local weights).", detail: "A direct response to Llama 4's dominance.", source: { n: 1, name: "The Information" }, voice: "gpt" },
+        { text: "NVIDIA Blackwell yield issues resolved; stock up 4% pre-market.", detail: "Supply chain normalization faster than consensus.", source: { n: 2, name: "Bloomberg" }, voice: "deepseek" },
+        { text: "EU AI Act 'Phase 2' enforcement begins today.", detail: "General purpose models now require watermark compliance.", source: { n: 3, name: "FT" }, voice: "mistral", severity: "risk" }
+      ],
+      matters: [
+        { text: "The pivot to 'Local Weights' validates the MirrorDNA thesis.", voice: "gpt" },
+        { text: "Regulatory drag in EU is widening the 'Compute Gap' compared to US/China.", voice: "mistral" }
+      ],
+      risks: [
+        { text: "Deepfake volume up 400% in Q4; verifying identity is now a critical path.", severity: "high", voice: "mistral" }
+      ],
+      actions: [
+        { text: "Monitor: OpenAI 'Sovereign' pricing vs. Llama 4 inference costs.", priority: "high" }
+      ],
+      ignore: [
+        { text: "Samsung's 'AI Fridge' announcements (CES vaporware).", voice: "groq" }
+      ]
+    }
+  }
+};
 
 // The Council — each voice has character
 const COUNCIL = {
@@ -68,96 +141,6 @@ const COUNCIL = {
 // ═══════════════════════════════════════════════════════════════
 // BRIEFING DATA — The Intelligence
 // ═══════════════════════════════════════════════════════════════
-
-const BRIEFINGS = {
-  1: {
-    date: 'January 6, 2026',
-    updated: new Date(),
-    sources: 8,
-    models: 4,
-    headline: 'The Industry Pivots from Spectacle to Substance',
-    subline: 'Mega IPOs approach. Open models democratize. The hype cycle ends.',
-    summary: `The AI industry is undergoing a fundamental transformation. After years of scaling-first approaches, 2026 marks the pivot to real-world deployment. Three historic IPOs—SpaceX, OpenAI, Anthropic—are poised to reshape capital markets with combined valuations approaching $3 trillion. Meanwhile, open-weight models like DeepSeek R1 challenge the oligopoly, giving anyone access to frontier capabilities without gatekeepers.`,
-    sections: {
-      changed: [
-        {
-          text: 'Industry transitioning from demonstration to deployment — practical applications now outpace benchmark improvements',
-          detail: 'TechCrunch reports 2026 as the year AI "sobers up." Targeted deployments replace scaling theater. Real revenue begins to matter.',
-          source: { n: 2, name: 'TechCrunch' },
-          voice: 'gpt'
-        },
-        {
-          text: 'Mega IPO year confirmed — SpaceX, OpenAI, Anthropic preparing public debuts with combined $3T+ valuation potential',
-          detail: 'Each company could individually raise $20+ billion, making these among the largest public offerings in history.',
-          source: { n: 4, name: 'Economic Times' },
-          voice: 'deepseek'
-        },
-        {
-          text: 'Open-weight models surge — DeepSeek R1 enables frontier performance without dependency on major tech gatekeepers',
-          detail: 'MIT Technology Review highlights the democratization: download, run locally, no API calls required.',
-          source: { n: 1, name: 'MIT Tech Review' },
-          voice: 'gpt'
-        },
-        {
-          text: 'Agentic AI evolution — moving beyond task completion to collaborative partnership in complex workflows',
-          detail: 'Medicine, software development, and manufacturing seeing AI as amplifier of expertise, not replacement.',
-          source: { n: 7, name: 'Tech Times' },
-          voice: 'groq'
-        }
-      ],
-      matters: [
-        {
-          text: 'Market confidence signal — successful IPOs would validate the thesis and trigger new funding waves',
-          source: { n: 5, name: 'Gizmodo' },
-          voice: 'deepseek'
-        },
-        {
-          text: 'Power redistribution — open models break concentration, shift advantage to those who deploy well',
-          source: { n: 1, name: 'MIT Tech Review' },
-          voice: 'gpt'
-        },
-        {
-          text: 'Integration phase — medicine, software, manufacturing entering production AI, not experiment AI',
-          source: { n: 3, name: 'Microsoft News' },
-          voice: 'groq'
-        }
-      ],
-      ignore: [
-        {
-          text: 'General optimism in coverage may mask correction risks — historical patterns suggest caution',
-          voice: 'mistral'
-        },
-        {
-          text: 'Collaboration framing overshadows displacement — watch for countervailing employment data',
-          voice: 'mistral'
-        }
-      ],
-      risks: [
-        {
-          text: 'Bubble concern intensifying — $3T combined valuation discussions echo dot-com patterns',
-          detail: 'Gizmodo explicitly asks: will 2026 be the year the AI bubble bursts?',
-          severity: 'high',
-          voice: 'mistral'
-        },
-        {
-          text: 'Regulatory fragmentation — EU AI Act enforcement Q2 could create compliance burden and slow innovation',
-          severity: 'medium',
-          voice: 'mistral'
-        }
-      ],
-      actions: [
-        { text: 'Monitor regulatory developments in EU and US — compliance timelines becoming concrete', priority: 'high' },
-        { text: 'Evaluate open-weight models for local deployment — R1, Llama integration feasibility', priority: 'high' },
-        { text: 'Assess IPO positioning — direct investment windows may open Q2-Q3', priority: 'medium' }
-      ],
-      dissent: {
-        text: 'The majority view is optimistic, but this mirrors patterns before corrections. The question is not whether a correction occurs, but when and how severe. Gizmodo raises this explicitly: current enthusiasm may not be sustainable.',
-        voice: 'mistral',
-        source: { n: 5, name: 'Gizmodo' }
-      }
-    }
-  }
-};
 
 // Generate empty briefings for other days
 [0, 2, 3, 4, 5, 6].forEach(day => {
@@ -206,7 +189,7 @@ const RESOLVED_PREDICTIONS = [
   }
 ];
 
-const PREDICTIONS = [
+PREDICTIONS = [
   {
     id: 'p-001',
     text: 'OpenAI IPO will value company at $200B+ within Q2 2026',
@@ -1037,4 +1020,5 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Initialize
-render();
+loadData(); // Try to load dynamic data
+render();   // Render static immediately

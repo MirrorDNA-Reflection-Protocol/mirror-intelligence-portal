@@ -1,0 +1,180 @@
+{
+    "meta": {
+        "date": "Tuesday, January 6, 2026",
+        "generated": "2026-01-06T12:00:00Z"
+    },
+    "briefing": {
+        "headline": "The Industry Pivots from Spectacle to Substance",
+        "subline": "CES 2026 is quiet. That is the point.",
+        "summary": "The era of 'AI Magic' marketing is over. As compute costs stabilize and consumer fatigue sets in, the major players (Apple, Google, OpenAI) are shifting focus to 'invisible intelligence'—deep integration, battery efficiency, and institutional reliability. The noise has collapsed; the signal is operational depth.",
+        "stats": {
+            "sources": 14,
+            "models": 4
+        },
+        "sections": {
+            "changed": [
+                {
+                    "text": "OpenAI announces 'Sovereign-Lite' tiers for enterprise (local weights).",
+                    "detail": "A direct response to Llama 4's dominance in on-prem markets.",
+                    "source": {
+                        "name": "The Information",
+                        "n": 1
+                    },
+                    "voice": "gpt",
+                    "severity": "low"
+                },
+                {
+                    "text": "NVIDIA Blackwell yield issues resolved; stock up 4% pre-market.",
+                    "detail": "Supply chain normalization faster than consensus.",
+                    "source": {
+                        "name": "Bloomberg",
+                        "n": 2
+                    },
+                    "voice": "deepseek",
+                    "severity": "low"
+                },
+                {
+                    "text": "EU AI Act 'Phase 2' enforcement begins today.",
+                    "detail": "General purpose models now require watermark compliance.",
+                    "source": {
+                        "name": "Financial Times",
+                        "n": 3
+                    },
+                    "voice": "mistral",
+                    "severity": "risk"
+                }
+            ],
+            "matters": [
+                {
+                    "text": "The pivot to 'Local Weights' validates the MirrorDNA thesis.",
+                    "voice": "gpt"
+                },
+                {
+                    "text": "Regulatory drag in EU is widening the 'Compute Gap' with US/China.",
+                    "voice": "mistral"
+                }
+            ],
+            "risks": [
+                {
+                    "text": "Deepfake volume up 400% in Q4; verifying identity is now a critical path.",
+                    "severity": "high",
+                    "voice": "mistral"
+                }
+            ],
+            "actions": [
+                {
+                    "text": "Monitor: OpenAI 'Sovereign' pricing vs. Llama 4 inference costs.",
+                    "priority": "high"
+                }
+            ],
+            "ignore": [
+                {
+                    "text": "Samsung's 'AI Fridge' announcements (CES vaporware).",
+                    "voice": "groq"
+                }
+            ]
+        }
+    },
+    "predictions": [
+        {
+            "id": "p-1",
+            "text": "OpenAI IPOs before Q3 2026",
+            "state": "strengthening",
+            "timeframe": "6 months",
+            "confidence": "High",
+            "probability": {
+                "base_rate": 35,
+                "updated": 72,
+                "range": [
+                    65,
+                    80
+                ],
+                "decay": "Q3 2026"
+            },
+            "reasoning": {
+                "gpt": {
+                    "position": "supports",
+                    "argument": "CFO hiring spree signals standard pre-IPO prep.",
+                    "would_change": "If Altman delays S-1 filing past March."
+                },
+                "deepseek": {
+                    "position": "supports",
+                    "argument": "Revenue metrics require public capital to sustain training run rates.",
+                    "would_change": "Private sovereign wealth injection >$50B."
+                },
+                "groq": {
+                    "position": "neutral",
+                    "argument": "Timing market is tricky; might wait for rate cuts.",
+                    "would_change": "Fed pivots hawkish."
+                },
+                "mistral": {
+                    "position": "skeptical",
+                    "argument": "Regulatory headwinds usually delay these timelines.",
+                    "would_change": "FTC clears antitrust probe early."
+                }
+            },
+            "evidence": [
+                {
+                    "type": "primary",
+                    "text": "Confirmation of new CFO (ex-Goldman)."
+                },
+                {
+                    "type": "quant",
+                    "text": "$11B annualized revenue run rate reported."
+                },
+                {
+                    "type": "analog",
+                    "text": "Compare to Facebook 2012 timeline relative to revenue maturity."
+                }
+            ]
+        },
+        {
+            "id": "p-2",
+            "text": "Apple releases 'Search' product in 2026",
+            "state": "weakening",
+            "timeframe": "12 months",
+            "confidence": "Low",
+            "probability": {
+                "base_rate": 10,
+                "updated": 25,
+                "range": [
+                    15,
+                    35
+                ],
+                "decay": "WWDC 2026"
+            },
+            "reasoning": {
+                "gpt": {
+                    "position": "skeptical",
+                    "argument": "Google deal is too lucrative ($20B/yr) to risk antitrust fire.",
+                    "would_change": "DOJ forces Google breakup."
+                },
+                "deepseek": {
+                    "position": "skeptical",
+                    "argument": "No capex spike in Apple server spend correlates to search index.",
+                    "would_change": "Massive data center capex announcement."
+                },
+                "groq": {
+                    "position": "neutral",
+                    "argument": "They might launch a 'Summarizer' and call it search.",
+                    "would_change": "N/A"
+                },
+                "mistral": {
+                    "position": "supports",
+                    "argument": "They effectively already have it in Spotlight; just needs branding.",
+                    "would_change": "iOS 20 leak showing 'Apple Search' icon."
+                }
+            },
+            "evidence": [
+                {
+                    "type": "quant",
+                    "text": "Google pays ~$20B/year for default slot."
+                },
+                {
+                    "type": "primary",
+                    "text": "Eddy Cue testimony in DOJ trial suggests 'no need' to build."
+                }
+            ]
+        }
+    ]
+}
