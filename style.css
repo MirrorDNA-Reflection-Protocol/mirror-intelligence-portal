@@ -43,6 +43,8 @@
     --signal-amber-dim: rgba(179, 138, 74, 0.12);
     --signal-rose: #8a4a5c;
     --signal-rose-dim: rgba(138, 74, 92, 0.12);
+    --signal-violet: #a162f7;
+    --signal-violet-dim: rgba(161, 98, 247, 0.12);
 
     /* Text hierarchy - measured contrast */
     --text-primary: rgba(255, 255, 255, 0.92);
@@ -113,6 +115,7 @@ body.sunlight-mode {
     --signal-cyan: #3d7a85;
     --signal-green: #2d5c48;
     --signal-rose: #8a3a4c;
+    --signal-violet: #702fbf;
 
     /* Disable glows in sun */
     --shadow-glow: none;

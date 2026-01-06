@@ -171,6 +171,13 @@ const COUNCIL = {
     role: 'Contrarian Voice',
     bias: 'Finds what everyone is missing. Comfortable with dissent.',
     color: 'rose'
+  },
+  swarm: {
+    name: 'THE SWARM',
+    symbol: '⚡',
+    role: 'Distribution',
+    bias: 'Fractures coherence into viral artifacts. Pure kinetic energy.',
+    color: 'violet'
   }
 };
 
@@ -1150,7 +1157,11 @@ function initLiveTerminal() {
     { agent: 'gpt', msg: 'Analyzing Twitter sentiment for "DeepSeek"... negative spike detected.' },
     { agent: 'deepseek', msg: 'Checking GitHub stars trend. Repo: deepseek-ai/DeepSeek-V3. Slope: +200/hour.' },
     { agent: 'groq', msg: 'Latency check: 120ms. Ingesting new batch.' },
-    { agent: 'mistral', msg: 'Rebutting GPT consensus on "Apple Search". Evidence weak.' }
+    { agent: 'mistral', msg: 'Rebutting GPT consensus on "Apple Search". Evidence weak.' },
+    { agent: 'swarm', msg: 'Fracturing briefing for X (Twitter). Thread count: 6 tweets.' },
+    { agent: 'swarm', msg: 'Generating "Hook": "The industry is lying to you about Agentic AI..."' },
+    { agent: 'swarm', msg: 'Formatting LinkedIn strategic frame. Tone: "Thought Leader".' },
+    { agent: 'swarm', msg: 'Distribution complete. Social artifacts deposited.' }
   ];
 
   function addLine(log) {
