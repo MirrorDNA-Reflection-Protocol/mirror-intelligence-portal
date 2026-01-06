@@ -1113,7 +1113,23 @@ function renderLivePage() {
 
         <!-- Column 2: The Stream -->
         <div class="live-stream-container" style="display: flex; flex-direction: column; overflow: hidden;">
-          <div style="color: #666; margin-bottom: 1rem;">COGNITION_STREAM_V3</div>
+          <div style="color: #666; margin-bottom: 0.5rem;">COGNITION_STREAM_V3</div>
+          
+          <!-- Stats Bar -->
+          <div id="stream-stats" style="display: flex; gap: 1.5rem; padding: 0.5rem 0; border-bottom: 1px solid #333; margin-bottom: 0.5rem; font-size: 0.75rem;">
+            <div><span style="color: #666;">TOKENS:</span> <span id="stat-tokens" style="color: var(--signal-cyan);">0</span></div>
+            <div><span style="color: #666;">LATENCY:</span> <span id="stat-latency" style="color: var(--signal-green);">--ms</span></div>
+            <div><span style="color: #666;">SOURCES:</span> <span id="stat-sources" style="color: var(--signal-gold);">0</span></div>
+            <div><span style="color: #666;">UPTIME:</span> <span id="stat-uptime" style="color: #888;">00:00</span></div>
+          </div>
+          
+          <!-- Activity Graph -->
+          <div style="height: 60px; margin-bottom: 0.5rem; border: 1px solid #222; background: rgba(0,10,0,0.3); position: relative; overflow: hidden;">
+            <canvas id="activity-graph" style="width: 100%; height: 100%;"></canvas>
+            <div style="position: absolute; top: 4px; left: 8px; font-size: 0.6rem; color: #444;">ACTIVITY</div>
+          </div>
+          
+          <!-- Terminal Output -->
           <div id="terminal-output" style="flex: 1; border: 1px solid #222; background: rgba(0,10,0,0.5); padding: 1rem; overflow-y: auto; font-size: 0.9rem; line-height: 1.4; scroll-behavior: smooth;">
             <!-- Terminal logs go here -->
           </div>
@@ -1200,10 +1216,92 @@ function initLiveTerminal() {
   }
 
   // Simulation Loop
+  let tokenCount = 0;
+  let sourceCount = 0;
+  const startTime = Date.now();
+
   setInterval(() => {
     const rand = logs[Math.floor(Math.random() * logs.length)];
     addLine(rand);
+
+    // Update stats
+    tokenCount += Math.floor(Math.random() * 500) + 100;
+    sourceCount += Math.random() > 0.7 ? 1 : 0;
+    const latency = Math.floor(Math.random() * 80) + 40;
+
+    const tokensEl = document.getElementById('stat-tokens');
+    const latencyEl = document.getElementById('stat-latency');
+    const sourcesEl = document.getElementById('stat-sources');
+
+    if (tokensEl) tokensEl.textContent = tokenCount.toLocaleString();
+    if (latencyEl) latencyEl.textContent = `${latency}ms`;
+    if (sourcesEl) sourcesEl.textContent = sourceCount;
   }, 1500);
+
+  // Uptime counter
+  setInterval(() => {
+    const uptimeEl = document.getElementById('stat-uptime');
+    if (!uptimeEl) return;
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+    const secs = (elapsed % 60).toString().padStart(2, '0');
+    uptimeEl.textContent = `${mins}:${secs}`;
+  }, 1000);
+
+  // Activity Graph Animation
+  const canvas = document.getElementById('activity-graph');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = canvas.offsetHeight * 2;
+    ctx.scale(2, 2);
+
+    let dataPoints = new Array(100).fill(10);
+
+    function drawGraph() {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Add new data point
+      const newVal = Math.random() * 40 + 5;
+      dataPoints.push(newVal);
+      if (dataPoints.length > 100) dataPoints.shift();
+
+      // Draw grid lines
+      ctx.strokeStyle = '#1a2a1a';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < 5; i++) {
+        const y = (h / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Draw waveform
+      ctx.strokeStyle = '#0f0';
+      ctx.lineWidth = 1;
+      ctx.shadowColor = '#0f0';
+      ctx.shadowBlur = 4;
+      ctx.beginPath();
+
+      dataPoints.forEach((val, i) => {
+        const x = (i / dataPoints.length) * w;
+        const y = h - (val / 50) * h;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      requestAnimationFrame(drawGraph);
+    }
+
+    drawGraph();
+  }
 }
 
 // Load saved theme
