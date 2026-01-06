@@ -1047,7 +1047,15 @@ document.addEventListener('keydown', (e) => {
   const keys = {
     'h': () => navigateTo('home'),
     'p': () => navigateTo('predictions'),
-    'a': () => navigateTo('about'),
+    'a': () => navigateTo('archive'),
+    'l': () => navigateTo('live'),
+    's': () => {
+      document.body.classList.toggle('sunlight-mode');
+      const isSun = document.body.classList.contains('sunlight-mode');
+      localStorage.setItem('mirror_theme', isSun ? 'sunlight' : 'dark');
+      console.log('⟡ Mode switched:', isSun ? 'Sunlight' : 'Dark');
+    },
+    '?': () => alert('Shortcuts:\n\nH / T: Today\nP: Predictions\nA: Archive\nL: Live Nerve Center\nS: Sunlight Mode (High Contrast)'),
     '1': () => selectTopic(1),
     '2': () => selectTopic(2),
     '3': () => selectTopic(3),
@@ -1185,6 +1193,11 @@ function initLiveTerminal() {
     const rand = logs[Math.floor(Math.random() * logs.length)];
     addLine(rand);
   }, 1500);
+}
+
+// Load saved theme
+if (localStorage.getItem('mirror_theme') === 'sunlight') {
+  document.body.classList.add('sunlight-mode');
 }
 
 // Initialize
