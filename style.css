@@ -1148,3 +1148,254 @@ footer {
         border: 1px solid #ddd;
     }
 }
+/* ═══════════════════════════════════════════════════════════════
+   LAYER 1: EXPANDED ANALYSIS
+   "Depth on Demand"
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Expand Button */
+.btn-expand {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto;
+}
+
+.btn-expand:hover, .btn-expand.active {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Analysis Panel */
+.prediction-container {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 1.5rem;
+}
+
+.prediction-container:last-child {
+  border-bottom: none;
+}
+
+.prediction-analysis {
+  margin-top: 1rem;
+  border-top: 1px dashed var(--border-subtle);
+  padding-top: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+.prediction-analysis.hidden {
+  display: none;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Reasoning wider than evidence */
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 900px) {
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Probability Spine */
+.probability-spine {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+}
+
+.prob-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.prob-bar-container {
+  position: relative;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.prob-range {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.prob-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--signal-cyan);
+  box-shadow: 0 0 8px var(--signal-cyan);
+  z-index: 2;
+}
+
+.prob-base {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--text-tertiary);
+  z-index: 1;
+  opacity: 0.5;
+  border-radius: 1px;
+}
+
+.prob-meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.prob-updated {
+  color: var(--signal-cyan);
+  font-weight: 500;
+}
+
+/* Council Reasoning Grid */
+.council-reasoning-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.reasoning-item {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+  border-left: 2px solid transparent;
+}
+
+.reasoning-item.supports { border-left-color: var(--signal-green); }
+.reasoning-item.neutral { border-left-color: var(--signal-amber); }
+.reasoning-item.skeptical { border-left-color: var(--signal-rose); }
+
+.reasoning-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.reasoning-role {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.reasoning-pos {
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+.reasoning-arg {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 0.75rem;
+}
+
+.reasoning-change {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin-top: auto;
+}
+
+.reasoning-change .label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Evidence Stack */
+.evidence-stack {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  padding: 1rem;
+  height: fit-content;
+}
+
+.evidence-header {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.evidence-item {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.evidence-item:last-child {
+  margin-bottom: 0;
+}
+
+.evidence-type {
+  font-size: 0.65rem;
+  color: var(--signal-gold);
+  opacity: 0.8;
+}
+
+.evidence-text {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Updates to existing Prediction Item */
+.prediction-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.confidence-text {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--signal-cyan);
+  font-weight: 500;
+}

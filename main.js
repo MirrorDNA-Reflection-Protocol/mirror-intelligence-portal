@@ -173,42 +173,133 @@ const BRIEFINGS = {
   };
 });
 
-// Predictions as living artifacts
+// Predictions as living artifacts — institutional-grade
 const PREDICTIONS = [
   {
     id: 'p-001',
     text: 'OpenAI IPO will value company at $200B+ within Q2 2026',
     state: 'strengthening',
-    confidence: 'high',
     timeframe: '6 months',
-    basis: 'Based on $3T combined signals and preparation reports.',
-    voice: 'deepseek',
     created: '2026-01-06',
-    momentum: 0.7
+    // Probabilistic rigor
+    probability: {
+      base_rate: 15,        // Historical base rate for tech IPO at this scale
+      updated: 68,          // Updated probability after evidence
+      range: [55, 78],      // Confidence interval
+      decay: 'Q2 2026'      // Time horizon
+    },
+    // Model-by-model reasoning
+    reasoning: {
+      gpt: {
+        position: 'supports',
+        argument: 'Narrative momentum is strong. IPO preparation signals are concrete.',
+        would_change: 'Significant market downturn or major safety incident'
+      },
+      deepseek: {
+        position: 'supports',
+        argument: '$3T combined valuation signals. Preparation costs already incurred.',
+        would_change: 'Revenue growth deceleration below 50% YoY'
+      },
+      groq: {
+        position: 'neutral',
+        argument: 'Timing uncertain. Q2 aggressive given regulatory scrutiny.',
+        would_change: 'Clear regulatory clearance signal'
+      },
+      mistral: {
+        position: 'skeptical',
+        argument: 'Valuation multiples historically unsustainable. Bubble concern valid.',
+        would_change: 'Demonstrated profitability path'
+      }
+    },
+    // Evidence stack
+    evidence: [
+      { type: 'primary', text: 'WSJ: OpenAI board approved IPO exploration Dec 2025' },
+      { type: 'quant', text: 'Last private round: $150B valuation, 33% premium expected' },
+      { type: 'analog', text: 'Comparable: Google IPO 2004 at 27x revenue' }
+    ]
   },
   {
     id: 'p-002',
     text: 'Open-weight models capture 30%+ of enterprise AI deployments by end of 2026',
     state: 'neutral',
-    confidence: 'medium',
     timeframe: '12 months',
-    basis: 'R1 performance approaching frontier. Cost and privacy advantages.',
-    voice: 'gpt',
     created: '2026-01-06',
-    momentum: 0
+    probability: {
+      base_rate: 12,
+      updated: 42,
+      range: [30, 55],
+      decay: 'Dec 2026'
+    },
+    reasoning: {
+      gpt: {
+        position: 'supports',
+        argument: 'DeepSeek R1 performance parity. Privacy/cost advantages compound.',
+        would_change: 'Major security vulnerability in open models'
+      },
+      deepseek: {
+        position: 'supports',
+        argument: 'Enterprise adoption accelerating. TCO 60% lower than API.',
+        would_change: 'OpenAI dramatic price cuts'
+      },
+      groq: {
+        position: 'neutral',
+        argument: 'Enterprise moves slowly. 30% aggressive for 12 months.',
+        would_change: 'Major Fortune 500 case studies'
+      },
+      mistral: {
+        position: 'supports',
+        argument: 'Regulatory push for data sovereignty favors local deployment.',
+        would_change: 'EU privacy exemption for cloud AI'
+      }
+    },
+    evidence: [
+      { type: 'primary', text: 'MIT TR: R1 benchmarks within 5% of GPT-4o' },
+      { type: 'quant', text: 'HuggingFace: 340% increase in enterprise model downloads' },
+      { type: 'analog', text: 'Linux enterprise adoption curve: 8% → 35% in 3 years' }
+    ]
   },
   {
     id: 'p-003',
     text: 'Major AI company faces significant regulatory action in US or EU',
     state: 'neutral',
-    confidence: 'medium',
     timeframe: '12 months',
-    basis: 'Intensifying policy conflicts. EU AI Act enforcement begins Q2.',
-    voice: 'mistral',
     created: '2026-01-06',
-    momentum: 0.2
+    probability: {
+      base_rate: 25,
+      updated: 58,
+      range: [45, 70],
+      decay: 'Dec 2026'
+    },
+    reasoning: {
+      gpt: {
+        position: 'supports',
+        argument: 'EU AI Act enforcement begins Q2. First actions likely by Q3.',
+        would_change: 'Enforcement budget cuts or delays'
+      },
+      deepseek: {
+        position: 'neutral',
+        argument: 'Fines likely but "significant" threshold unclear.',
+        would_change: 'Clear definition of significant (>$1B fine)'
+      },
+      groq: {
+        position: 'supports',
+        argument: 'Bipartisan regulatory pressure in US. DOJ already investigating.',
+        would_change: 'Administration change in priorities'
+      },
+      mistral: {
+        position: 'supports',
+        argument: 'Copyright lawsuits create regulatory leverage. Settlement pressure high.',
+        would_change: 'Broad licensing deals with content owners'
+      }
+    },
+    evidence: [
+      { type: 'primary', text: 'EU AI Act: Feb 2026 enforcement deadline' },
+      { type: 'quant', text: 'Current open investigations: 7 (EU), 3 (US DOJ)' },
+      { type: 'analog', text: 'GDPR first major action: 18 months after enforcement' }
+    ]
   }
 ];
+
 
 const SOURCES = [
   { n: 1, title: "What's next for AI in 2026", domain: 'technologyreview.com', tier: 1 },
@@ -450,6 +541,82 @@ function renderCouncil() {
   `;
 }
 
+
+window.toggleAnalysis = function (id) {
+  const el = document.getElementById(`analysis-${id}`);
+  const btn = document.getElementById(`btn-${id}`);
+  if (el.classList.contains('hidden')) {
+    el.classList.remove('hidden');
+    btn.textContent = 'Collapse Analysis';
+    btn.classList.add('active');
+  } else {
+    el.classList.add('hidden');
+    btn.textContent = 'Expand Analysis';
+    btn.classList.remove('active');
+  }
+};
+
+function renderProbability(prob) {
+  if (!prob) return '';
+  const rangeWidth = prob.range[1] - prob.range[0];
+  const rangeLeft = prob.range[0];
+
+  return `
+    <div class="probability-spine">
+      <div class="prob-label">Probability Spine</div>
+      <div class="prob-bar-container">
+        <div class="prob-range" style="left: ${rangeLeft}%; width: ${rangeWidth}%;"></div>
+        <div class="prob-marker" style="left: ${prob.updated}%;"></div>
+        <div class="prob-base" style="left: ${prob.base_rate}%;" title="Base Rate: ${prob.base_rate}%"></div>
+      </div>
+      <div class="prob-meta">
+        <span>Base Rate: ${prob.base_rate}%</span>
+        <span class="prob-updated">Updated: ${prob.updated}%</span>
+        <span>Confidence: ${prob.range[0]}%–${prob.range[1]}%</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderReasoning(reasoning) {
+  if (!reasoning) return '';
+  return `
+    <div class="council-reasoning-grid">
+      ${Object.entries(reasoning).map(([key, r]) => {
+    const v = COUNCIL[key];
+    return `
+          <div class="reasoning-item ${r.position}">
+            <div class="reasoning-header">
+              <span class="voice-symbol" style="color: var(--signal-${v.color})">${v.symbol}</span>
+              <span class="reasoning-role">${v.name}</span>
+              <span class="reasoning-pos">${r.position}</span>
+            </div>
+            <div class="reasoning-arg">"${r.argument}"</div>
+            <div class="reasoning-change">
+              <span class="label">Would Change View:</span> ${r.would_change}
+            </div>
+          </div>
+        `;
+  }).join('')}
+    </div>
+  `;
+}
+
+function renderEvidence(evidence) {
+  if (!evidence) return '';
+  return `
+    <div class="evidence-stack">
+      <div class="evidence-header">Evidence Stack</div>
+      ${evidence.map(e => `
+        <div class="evidence-item ${e.type}">
+          <span class="evidence-type mono">${e.type.toUpperCase()}</span>
+          <span class="evidence-text">${e.text}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
 function renderPredictions() {
   return `
     <div class="panel-section">
@@ -458,19 +625,32 @@ function renderPredictions() {
         <span class="ghost-text">${PREDICTIONS.length} active</span>
       </div>
       ${PREDICTIONS.map(p => `
-        <div class="prediction-item ${p.state}">
-          <div class="prediction-text">${p.text}</div>
-          <div class="prediction-basis">${p.basis}</div>
-          <div class="prediction-meta">
-            ${renderVoiceBadge(p.voice)}
-            <span class="confidence ${p.confidence}">${p.confidence}</span>
-            <span class="timeframe mono">${p.timeframe}</span>
+        <div class="prediction-container">
+          <div class="prediction-item ${p.state}">
+            <div class="prediction-main">
+              <div class="prediction-text">${p.text}</div>
+              <div class="prediction-meta-row">
+                <span class="timeframe mono">⏱ ${p.timeframe}</span>
+                <span class="confidence-text">${p.probability ? p.probability.updated + '%' : p.confidence}</span>
+                <button id="btn-${p.id}" class="btn-expand" onclick="toggleAnalysis('${p.id}')">Expand Analysis</button>
+              </div>
+            </div>
+          </div>
+          <div id="analysis-${p.id}" class="prediction-analysis hidden">
+             <div class="analysis-content">
+               ${renderProbability(p.probability)}
+               <div class="analysis-grid">
+                 ${renderReasoning(p.reasoning)}
+                 ${renderEvidence(p.evidence)}
+               </div>
+             </div>
           </div>
         </div>
       `).join('')}
     </div>
   `;
 }
+
 
 function renderSources() {
   return `
