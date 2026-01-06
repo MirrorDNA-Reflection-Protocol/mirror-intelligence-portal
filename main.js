@@ -1368,7 +1368,8 @@ function initLiveTerminal() {
         ctx.fillText(agent.id.toUpperCase(), w - 45, y + 3);
       });
 
-      requestAnimationFrame(drawGraph);
+      // Slow animation: 4 updates per second instead of 60
+      setTimeout(() => requestAnimationFrame(drawGraph), 250);
     }
 
     drawGraph();
