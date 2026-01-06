@@ -122,16 +122,44 @@ body.sunlight-mode {
 /* Specifically invert the nerve center for readability */
 body.sunlight-mode .live-nerve-center {
     background: #ffffff !important;
-    color: #004400 !important;
+    color: #000000 !important;
 }
 
 body.sunlight-mode .live-nerve-center .agent-node {
-    border-color: #ccc !important;
-    color: #111 !important;
+    border: 2px solid #000 !important;
+    color: #000 !important;
+    background: #fff !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
 }
 
 body.sunlight-mode .live-nerve-center .agent-node span {
-    color: #111 !important;
+    color: #000 !important;
+    font-weight: 800 !important;
+}
+
+/* Force terminal content to black */
+body.sunlight-mode #terminal-output {
+    background: #f8f8f8 !important;
+    border: 2px solid #000 !important;
+    color: #000 !important;
+}
+
+body.sunlight-mode #terminal-output span {
+    color: #000 !important;
+    font-weight: 600 !important;
+}
+
+/* Reduce glare from gradients */
+body.sunlight-mode .live-nerve-center>div:first-child {
+    display: none !important;
+    /* Hide the radial gradient overlay */
+}
+
+/* Make timestamps visible */
+body.sunlight-mode #terminal-output div span:first-child {
+    color: #444 !important;
+    font-weight: 700 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
