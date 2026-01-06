@@ -1095,9 +1095,9 @@ function renderLivePage() {
         </div>
       </div>
 
-      <div class="live-grid" style="display: grid; grid-template-columns: 250px 1fr 300px; gap: 2rem; height: calc(100% - 100px);">
+      <div class="live-grid" style="display: grid; grid-template-columns: ${window.innerWidth < 768 ? '1fr' : '250px 1fr 300px'}; gap: ${window.innerWidth < 768 ? '1rem' : '2rem'}; height: ${window.innerWidth < 768 ? 'auto' : 'calc(100% - 100px)'}; overflow-y: ${window.innerWidth < 768 ? 'auto' : 'visible'};">
         <!-- Column 1: Active Agents -->
-        <div class="live-agents">
+        <div class="live-agents" style="${window.innerWidth < 768 ? 'display: flex; flex-wrap: wrap; gap: 0.5rem;' : ''}">
           <div style="color: #666; margin-bottom: 1rem;">ACTIVE NODES</div>
           ${Object.entries(COUNCIL).map(([k, v]) => `
             <div class="agent-node" id="agent-${k}" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #222; opacity: 0.7; transition: all 0.3s;">
