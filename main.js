@@ -415,6 +415,7 @@ function renderHeader() {
         <nav>
           <a href="#" onclick="navigateTo('home'); return false;" class="${currentPage === 'home' ? 'active' : ''}">Today</a>
           <a href="#" onclick="navigateTo('predictions'); return false;" class="${currentPage === 'predictions' ? 'active' : ''}">Predictions</a>
+          <a href="#" onclick="navigateTo('live'); return false;" class="${currentPage === 'live' ? 'active' : ''}"><span class="pulse-dot">●</span> Live</a>
           <a href="#" onclick="navigateTo('archive'); return false;" class="${currentPage === 'archive' ? 'active' : ''}">Archive</a>
           <a href="#" onclick="navigateTo('about'); return false;" class="${currentPage === 'about' ? 'active' : ''}">Method</a>
         </nav>
@@ -977,6 +978,9 @@ function render() {
     content = `<main>${renderPredictionsPage()}</main>`;
   } else if (currentPage === 'archive') {
     content = `<main>${renderArchivePage()}</main>`;
+  } else if (currentPage === 'live') {
+    content = `<main>${renderLivePage()}</main>`;
+    setTimeout(initLiveTerminal, 100);
   } else if (currentPage === 'terms') {
     content = `<main style="max-width: 800px; margin: 0 auto; padding: 4rem 2rem;">
       <h1>Terms & Disclaimers</h1>
@@ -1055,6 +1059,133 @@ document.addEventListener('keydown', (e) => {
 
   if (keys[e.key]) keys[e.key]();
 });
+
+// ═══════════════════════════════════════════════════════════════
+// LIVE NERVE CENTER
+// ═══════════════════════════════════════════════════════════════
+
+function renderLivePage() {
+  return `
+    <div class="live-nerve-center" style="height: calc(100vh - 80px); background: #000; color: #0f0; font-family: 'JetBrains Mono', monospace; padding: 2rem; overflow: hidden; position: relative;">
+      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(0, 50, 0, 0.1) 0%, rgba(0,0,0,1) 90%); pointer-events: none;"></div>
+      
+      <div class="live-header" style="display: flex; justify-content: space-between; margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem;">
+        <div>
+          <span style="color: #fff;">MIRROR CONSORTIUM // NERVE CENTER</span>
+          <br><span style="color: #666; font-size: 0.8rem;">ESTABLISHED CONNECTION: SECURE (TLS 1.3)</span>
+        </div>
+        <div style="text-align: right;">
+          <span class="live-clock">${new Date().toISOString()}</span>
+          <br><span style="color: var(--signal-green);">● SYSTEM ONLINE</span>
+        </div>
+      </div>
+
+      <div class="live-grid" style="display: grid; grid-template-columns: 250px 1fr 300px; gap: 2rem; height: calc(100% - 100px);">
+        <!-- Column 1: Active Agents -->
+        <div class="live-agents">
+          <div style="color: #666; margin-bottom: 1rem;">ACTIVE NODES</div>
+          ${Object.entries(COUNCIL).map(([k, v]) => `
+            <div class="agent-node" id="agent-${k}" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #222; opacity: 0.7; transition: all 0.3s;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="color: var(--signal-${v.color});">${v.symbol}</span>
+                <span style="font-weight: bold; color: #fff;">${v.name}</span>
+              </div>
+              <div class="agent-status" style="font-size: 0.7rem; color: #888; margin-top: 0.5rem;">IDLE</div>
+              <div class="agent-activity" style="font-size: 0.7rem; color: var(--signal-${v.color}); height: 2px; width: 0%; background: currentColor; margin-top: 0.5rem; transition: width 0.2s;"></div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Column 2: The Stream -->
+        <div class="live-stream-container" style="display: flex; flex-direction: column; overflow: hidden;">
+          <div style="color: #666; margin-bottom: 1rem;">COGNITION_STREAM_V3</div>
+          <div id="terminal-output" style="flex: 1; border: 1px solid #222; background: rgba(0,10,0,0.5); padding: 1rem; overflow-y: auto; font-size: 0.9rem; line-height: 1.4; scroll-behavior: smooth;">
+            <!-- Terminal logs go here -->
+          </div>
+        </div>
+
+        <!-- Column 3: The Stack -->
+        <div class="live-stack">
+          <div style="color: #666; margin-bottom: 1rem;">LATEST_INGESTION</div>
+          <div id="ingest-stack" style="font-size: 0.8rem; color: #888;">
+            <div style="border-left: 2px solid #333; padding-left: 1rem; margin-bottom: 1rem;">
+              <div>Reading: RSS_FEED_TECHCRUNCH</div>
+              <div>Parsing... OK</div>
+            </div>
+             <div style="border-left: 2px solid #333; padding-left: 1rem; margin-bottom: 1rem;">
+              <div>NewsWeb: fetching 'DeepSeek R1'</div>
+              <div>Status: 200 OK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LIVE TERMINAL LOGIC
+// ═══════════════════════════════════════════════════════════════
+
+function initLiveTerminal() {
+  const terminal = document.getElementById('terminal-output');
+  if (!terminal) return;
+
+  const logs = [
+    { agent: 'system', msg: 'Initializing Consortium Protocols...' },
+    { agent: 'system', msg: 'Loading context from MirrorDNA Vault...' },
+    { agent: 'gpt', msg: 'Scanning narrative layer: DETECTED shift in "OpenAI IPO" framing.' },
+    { agent: 'deepseek', msg: 'Ingesting financial report: 10-K from NVIDIA. Verifying CAPEX figures.' },
+    { agent: 'mistral', msg: 'Counter-point generated: The market is ignoring regulatory tail risks in EU.' },
+    { agent: 'groq', msg: 'Filtering noise: Samsung CES announcement marked "irrelevant".' },
+    { agent: 'system', msg: 'Synthesis complete. Formatting JSON...' },
+    { agent: 'gpt', msg: 'Analyzing Twitter sentiment for "DeepSeek"... negative spike detected.' },
+    { agent: 'deepseek', msg: 'Checking GitHub stars trend. Repo: deepseek-ai/DeepSeek-V3. Slope: +200/hour.' },
+    { agent: 'groq', msg: 'Latency check: 120ms. Ingesting new batch.' },
+    { agent: 'mistral', msg: 'Rebutting GPT consensus on "Apple Search". Evidence weak.' }
+  ];
+
+  function addLine(log) {
+    const line = document.createElement('div');
+    line.style.marginBottom = '0.5rem';
+    line.style.opacity = '0';
+    line.style.animation = 'fadeIn 0.2s forwards';
+
+    const ts = new Date().toISOString().split('T')[1].split('.')[0];
+
+    let color = '#888';
+    if (log.agent !== 'system' && COUNCIL[log.agent]) color = `var(--signal-${COUNCIL[log.agent].color})`;
+
+    line.innerHTML = `<span style="color: #444;">[${ts}]</span> <span style="color: ${color}; font-weight: bold;">${log.agent.toUpperCase()}</span>: ${log.msg}`;
+
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
+
+    // Animate agent nav
+    if (log.agent !== 'system') {
+      const node = document.getElementById(`agent-${log.agent}`);
+      if (node) {
+        node.style.borderColor = color;
+        node.style.boxShadow = `0 0 10px ${color}33`;
+        node.querySelector('.agent-status').textContent = 'PROCESSING';
+        node.querySelector('.agent-activity').style.width = '100%';
+
+        setTimeout(() => {
+          node.style.borderColor = '#222';
+          node.style.boxShadow = 'none';
+          node.querySelector('.agent-status').textContent = 'IDLE';
+          node.querySelector('.agent-activity').style.width = '0%';
+        }, 800);
+      }
+    }
+  }
+
+  // Simulation Loop
+  setInterval(() => {
+    const rand = logs[Math.floor(Math.random() * logs.length)];
+    addLine(rand);
+  }, 1500);
+}
 
 // Initialize
 loadData(); // Try to load dynamic data
