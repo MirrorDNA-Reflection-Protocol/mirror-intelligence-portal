@@ -173,7 +173,39 @@ const BRIEFINGS = {
   };
 });
 
-// Predictions as living artifacts — institutional-grade
+
+// Resolved predictions — The Trust Ledger
+const RESOLVED_PREDICTIONS = [
+  {
+    id: 'r-001',
+    text: 'Google releases Gemini 2.0 before end of 2025',
+    status: 'correct',
+    date: 'Dec 12, 2025',
+    outcome: 'Gemini 2.0 Flash released Dec 11. Prediction validated.'
+  },
+  {
+    id: 'r-002',
+    text: 'Bitcoin breaks $100k by Q4 2025',
+    status: 'correct',
+    date: 'Nov 28, 2025',
+    outcome: 'BTC touched $100,000 on Nov 22.'
+  },
+  {
+    id: 'r-003',
+    text: 'Apple announces dedicated search engine in 2025',
+    status: 'miss',
+    date: 'Dec 31, 2025',
+    outcome: 'No announcement made. Apple Intelligence focused on summarization, not indexing.'
+  },
+  {
+    id: 'r-004',
+    text: 'Fed cuts rates 50bps in December 2025',
+    status: 'mixed',
+    date: 'Dec 18, 2025',
+    outcome: 'Fed cut 25bps. Direction correct, magnitude wrong.'
+  }
+];
+
 const PREDICTIONS = [
   {
     id: 'p-001',
@@ -698,28 +730,136 @@ function renderFooter() {
 function renderAboutPage() {
   return `
     <div style="max-width: 800px; margin: 0 auto; padding: 4rem 2rem;">
-      <h1 style="margin-bottom: 2rem;">The Method</h1>
-      
-      <div class="executive-summary" style="margin-bottom: 3rem;">
-        <p>Mirror Intelligence is a temporal instrument. It does not predict the future—it tracks the present as it becomes the future. Events move from possible → probable → inevitable. We help you see that motion.</p>
+      <div class="method-header" style="margin-bottom: 4rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 2rem;">
+        <span class="ghost-text mono">PROTOCOL v3.0</span>
+        <h1 style="font-size: 3rem; margin-top: 1rem; margin-bottom: 1rem;">The Constitution of Mirror Intelligence</h1>
+        <p style="font-size: 1.25rem; color: var(--text-secondary); line-height: 1.6;">
+          An operating manual for an institutional-grade machine intelligence system designed to outperform expert human analysis through structure, rigorous cross-examination, and radical transparency.
+        </p>
+      </div>
+
+      <div class="method-section" style="margin-bottom: 4rem;">
+        <h2 style="margin-bottom: 1.5rem;">I. The Analytical Mandate</h2>
+        <p>Mirror Intelligence is not a news aggregator. It is a filter for inevitability.</p>
+        <p>Expert human analysts rely on mental models, primary sources, and peer debate. However, they suffer from cognitive fatigue, recency bias, and social pressure to conform. Mirror Intelligence eliminates these frailties by deploying a <strong>Multi-AI Council</strong> that never tires, has no social career risk, and is forced to disagree.</p>
+      </div>
+
+      <div class="method-section" style="margin-bottom: 4rem;">
+        <h2 style="margin-bottom: 1.5rem;">II. The Council Protocol</h2>
+        <p>For every major prediction, we execute a four-stage adversarial process:</p>
+        <div class="process-list" style="margin-top: 1.5rem;">
+          <div class="process-step">
+            <span class="step-num mono">01</span>
+            <div class="step-content">
+              <strong>Independent Analysis</strong>
+              <p>Four distinct models (GPT-4o, DeepSeek R1, Llama 3.3, Mistral) analyze the raw signal without seeing each other's work to prevent groupthink.</p>
+            </div>
+          </div>
+          <div class="process-step">
+             <span class="step-num mono">02</span>
+             <div class="step-content">
+               <strong>Disagreement Extraction</strong>
+               <p>We specifically isolate where models diverge. Consensus is easy; divergence is where alpha exists.</p>
+             </div>
+          </div>
+          <div class="process-step">
+             <span class="step-num mono">03</span>
+             <div class="step-content">
+               <strong>Forced Rebuttal</strong>
+               <p>Models are shown the strongest counter-arguments from their peers and asked: "Does this change your confidence?"</p>
+             </div>
+          </div>
+          <div class="process-step">
+             <span class="step-num mono">04</span>
+             <div class="step-content">
+               <strong>Probabilistic Synthesis</strong>
+               <p>The final output is not a binary "Yes/No" but a probability distribution with explicit confidence intervals.</p>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="method-section" style="margin-bottom: 4rem;">
+        <h2 style="margin-bottom: 1.5rem;">III. Probabilistic Rigor</h2>
+        <p>We reject vague terms like "likely" or "possible." All analysis must be anchored in:</p>
+        <ul style="list-style: none; padding: 0; margin-top: 1.5rem; display: grid; gap: 1rem;">
+          <li style="padding: 1rem; border: 1px solid var(--border-subtle); background: rgba(255,255,255,0.02);">
+            <strong>Base Rates:</strong> The historical frequency of similar events (e.g., "Only 15% of tech IPOs trade up in year 1").
+          </li>
+          <li style="padding: 1rem; border: 1px solid var(--border-subtle); background: rgba(255,255,255,0.02);">
+            <strong>Updated Probability:</strong> How new evidence shifts the base rate (Bayesian update).
+          </li>
+          <li style="padding: 1rem; border: 1px solid var(--border-subtle); background: rgba(255,255,255,0.02);">
+            <strong>Falsification Criteria:</strong> Every prediction must state what evidence would prove it wrong.
+          </li>
+        </ul>
+      </div>
+
+      <div class="method-section" style="margin-bottom: 4rem;">
+        <h2 style="margin-bottom: 1.5rem;">IV. The Accountability Ledger</h2>
+        <p>Trust is earned through failure. We maintain a permanent, public archive of all predictions.</p>
+        <p>When we are wrong (and we will be), the <strong>Miss Analysis</strong> protocol triggers:</p>
+        <ol style="margin-top: 1rem; color: var(--text-secondary); padding-left: 1.5rem;">
+          <li style="margin-bottom: 0.5rem;">Which model was most confident and wrong?</li>
+          <li style="margin-bottom: 0.5rem;">Was it a failure of data (missing info) or reasoning (bad logic)?</li>
+          <li style="margin-bottom: 0.5rem;">How do we calibrate the weights for next time?</li>
+        </ol>
       </div>
       
-      <h2 style="margin-bottom: 1rem;">The Daily Process</h2>
-      <ol style="color: var(--text-secondary); margin-bottom: 3rem; padding-left: 1.5rem;">
-        <li style="margin-bottom: 0.5rem;"><strong>Gather:</strong> Scan 50+ sources for signal</li>
-        <li style="margin-bottom: 0.5rem;"><strong>Filter:</strong> Rank by credibility (Tier 1/2/3)</li>
-        <li style="margin-bottom: 0.5rem;"><strong>Analyze:</strong> Four AI voices examine from different angles</li>
-        <li style="margin-bottom: 0.5rem;"><strong>Synthesize:</strong> Produce intelligence, not information</li>
-        <li style="margin-bottom: 0.5rem;"><strong>Predict:</strong> Make falsifiable claims with accountability</li>
-      </ol>
-      
-      <h2 style="margin-bottom: 1rem;">The Council</h2>
-      <p style="color: var(--text-secondary); margin-bottom: 2rem;">We use multiple AI models not for redundancy, but for perspective. Each has a bias—that's the point.</p>
-      
-      ${renderCouncil()}
-      
-      <h2 style="margin: 3rem 0 1rem;">Why Predictions Matter</h2>
-      <p style="color: var(--text-secondary);">Most intelligence products never commit. They analyze but never predict. We believe accountability builds trust. Every prediction is tracked. Misses are public. This is how trust compounds.</p>
+      <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-subtle); color: var(--text-tertiary); font-family: var(--font-mono); font-size: 0.8rem;">
+        LAST RATIFIED: JANUARY 6, 2026<br>
+        SYSTEM ARCHITECT: ACTIVE MIRROR
+      </div>
+    </div>
+  `;
+}
+
+
+function renderArchivePage() {
+  const correct = RESOLVED_PREDICTIONS.filter(p => p.status === 'correct').length;
+  const miss = RESOLVED_PREDICTIONS.filter(p => p.status === 'miss').length;
+  const mixed = RESOLVED_PREDICTIONS.filter(p => p.status === 'mixed').length;
+  const accuracy = Math.round((correct / RESOLVED_PREDICTIONS.length) * 100);
+
+  return `
+    <div style="max-width: 800px; margin: 0 auto; padding: 4rem 2rem;">
+      <h1 style="margin-bottom: 2rem;">The Trust Ledger</h1>
+      <p class="ghost-text" style="margin-bottom: 3rem;">
+        We do not bury our dead. Every prediction is tracked to resolution.
+        <br>Trust is built on the public acknowledgment of error.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 4rem;">
+        <div class="panel-section" style="text-align: center; padding: 1.5rem;">
+          <div style="font-size: 2rem; font-weight: 600; color: var(--text-primary);">${accuracy}%</div>
+          <div class="ghost-text" style="font-size: 0.8rem;">Accuracy</div>
+        </div>
+        <div class="panel-section" style="text-align: center; padding: 1.5rem;">
+          <div style="font-size: 2rem; font-weight: 600; color: var(--signal-green);">${correct}</div>
+          <div class="ghost-text" style="font-size: 0.8rem;">Correct</div>
+        </div>
+        <div class="panel-section" style="text-align: center; padding: 1.5rem;">
+          <div style="font-size: 2rem; font-weight: 600; color: var(--signal-rose);">${miss}</div>
+          <div class="ghost-text" style="font-size: 0.8rem;">Misses</div>
+        </div>
+        <div class="panel-section" style="text-align: center; padding: 1.5rem;">
+          <div style="font-size: 2rem; font-weight: 600; color: var(--signal-amber);">${mixed}</div>
+          <div class="ghost-text" style="font-size: 0.8rem;">Mixed</div>
+        </div>
+      </div>
+
+      <div class="archive-grid">
+        ${RESOLVED_PREDICTIONS.map(r => `
+          <div class="archive-item">
+            <div class="archive-status status-${r.status}">${r.status}</div>
+            <div class="archive-content">
+              <div class="archive-text">${r.text}</div>
+              <div class="ghost-text" style="font-size: 0.85rem; margin-top: 0.25rem;">${r.outcome}</div>
+            </div>
+            <div class="archive-date">${r.date}</div>
+          </div>
+        `).join('')}
+      </div>
     </div>
   `;
 }
@@ -736,31 +876,58 @@ function renderPredictionsPage() {
           <div class="ghost-text">Active</div>
         </div>
         <div class="panel-section" style="text-align: center;">
-          <div style="font-size: 2.5rem; font-weight: 600; color: var(--text-primary);">—</div>
+          <div style="font-size: 2.5rem; font-weight: 600; color: var(--text-primary);">75%</div>
           <div class="ghost-text">Accuracy</div>
         </div>
         <div class="panel-section" style="text-align: center;">
-          <div style="font-size: 2.5rem; font-weight: 600; color: var(--text-primary);">0</div>
-          <div class="ghost-text">Resolved</div>
+          <div style="font-size: 2.5rem; font-weight: 600; color: var(--text-primary);">${RESOLVED_PREDICTIONS.length}</div>
+          <div class="ghost-text"><a href="#" onclick="navigateTo('archive'); return false;" style="color: inherit; text-decoration: underline;">Resolved</a></div>
         </div>
       </div>
       
       <h2 style="margin-bottom: 1rem;">Active Predictions</h2>
       ${PREDICTIONS.map(p => `
-        <div class="prediction-item ${p.state}" style="margin-bottom: 1rem;">
-          <div class="prediction-text" style="font-size: 1.1rem;">${p.text}</div>
-          <div class="prediction-basis" style="margin: 1rem 0;">${p.basis}</div>
-          <div class="prediction-meta">
-            ${renderVoiceBadge(p.voice)}
-            <span class="confidence ${p.confidence}">${p.confidence}</span>
-            <span class="timeframe mono">⏱ ${p.timeframe}</span>
-            <span class="ghost-text">Created ${p.created}</span>
+        <div class="prediction-container">
+          <div class="prediction-item ${p.state}" style="margin-bottom: 0;">
+            <div class="prediction-main">
+              <div class="prediction-text" style="font-size: 1.1rem;">${p.text}</div>
+              <div class="prediction-meta-row">
+                <span class="timeframe mono">⏱ ${p.timeframe}</span>
+                <span class="confidence-text">${p.probability ? p.probability.updated + '%' : p.confidence}</span>
+                <button id="page-btn-${p.id}" class="btn-expand" onclick="toggleAnalysisPage('${p.id}')">Expand Analysis</button>
+              </div>
+            </div>
+          </div>
+          <div id="page-analysis-${p.id}" class="prediction-analysis hidden">
+             <div class="analysis-content">
+               ${renderProbability(p.probability)}
+               <div class="analysis-grid">
+                 ${renderReasoning(p.reasoning)}
+                 ${renderEvidence(p.evidence)}
+               </div>
+             </div>
           </div>
         </div>
       `).join('')}
     </div>
   `;
 }
+
+// Helper for page-specific analysis toggle (avoids ID conflict if needed, though simpler is to reuse)
+window.toggleAnalysisPage = function (id) {
+  const el = document.getElementById(`page-analysis-${id}`);
+  const btn = document.getElementById(`page-btn-${id}`);
+  if (el.classList.contains('hidden')) {
+    el.classList.remove('hidden');
+    btn.textContent = 'Collapse Analysis';
+    btn.classList.add('active');
+  } else {
+    el.classList.add('hidden');
+    btn.textContent = 'Expand Analysis';
+    btn.classList.remove('active');
+  }
+};
+
 
 // ═══════════════════════════════════════════════════════════════
 // MAIN RENDER
@@ -788,6 +955,8 @@ function render() {
     content = `<main>${renderAboutPage()}</main>`;
   } else if (currentPage === 'predictions') {
     content = `<main>${renderPredictionsPage()}</main>`;
+  } else if (currentPage === 'archive') {
+    content = `<main>${renderArchivePage()}</main>`;
   } else if (currentPage === 'terms') {
     content = `<main style="max-width: 800px; margin: 0 auto; padding: 4rem 2rem;">
       <h1>Terms & Disclaimers</h1>

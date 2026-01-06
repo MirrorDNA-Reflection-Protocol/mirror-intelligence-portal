@@ -1399,3 +1399,105 @@ footer {
   color: var(--signal-cyan);
   font-weight: 500;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYER 2: METHODOLOGY & TRUST
+   "The Constitution"
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Process Steps */
+.process-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.process-step {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.step-num {
+  font-size: 1.5rem;
+  color: var(--signal-gold);
+  opacity: 0.5;
+  padding-top: 0.2rem;
+}
+
+.step-content strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.step-content p {
+  line-height: 1.5;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* Archive / Trust Ledger */
+.archive-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.archive-item {
+  display: grid;
+  grid-template-columns: 80px 1fr auto; /* Status | Text | Date */
+  gap: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  align-items: center;
+}
+
+.archive-status {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.status-correct {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--signal-green);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-miss {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--signal-rose);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.status-mixed {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--signal-amber);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.archive-text {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.archive-date {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 700px) {
+  .archive-item {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
