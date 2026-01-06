@@ -345,7 +345,7 @@ function renderHeader() {
     <header>
       <div class="header-content">
         <a href="#" class="logo" onclick="navigateTo('home'); return false;">
-          <div class="logo-icon">⟡</div>
+          <img src="/logo.png" alt="Active Mirror" class="logo-img" />
           <div class="logo-text">Mirror <span>Intelligence</span></div>
         </a>
         <nav>
@@ -354,6 +354,10 @@ function renderHeader() {
           <a href="#" onclick="navigateTo('about'); return false;" class="${currentPage === 'about' ? 'active' : ''}">How It Works</a>
           <a href="#" onclick="navigateTo('terms'); return false;" class="${currentPage === 'terms' ? 'active' : ''}">Terms</a>
         </nav>
+        <div class="header-actions">
+          <button class="share-btn" onclick="shareContent()" title="Share">📤</button>
+          <button class="print-btn" onclick="window.print()" title="Print">🖨️</button>
+        </div>
       </div>
     </header>
   `;
@@ -364,12 +368,16 @@ function renderHero() {
   const topic = TOPICS[currentTopic];
   const isEmpty = briefing.articleCount === 0;
 
+  // Calculate reading time
+  const readingTime = isEmpty ? 0 : Math.ceil(briefing.executiveSummary.split(' ').length / 200 * 3);
+
   return `
     <section class="hero">
       <div class="live-time-bar">
         <span class="live-indicator">🔴 LIVE</span>
         <span id="live-date">${formatDate()}</span>
         <span id="live-clock">${formatLiveTime()}</span>
+        ${!isEmpty ? `<span class="reading-time">📖 ${readingTime} min read</span>` : ''}
       </div>
       <h1>${topic.icon} ${briefing.keyInsights.headline}</h1>
       <p>${briefing.keyInsights.subheadline}</p>
@@ -387,6 +395,11 @@ function renderHero() {
           <span class="stat-num">$3T</span>
           <span class="stat-label">IPO Valuations</span>
         </div>
+      </div>
+      <div class="share-bar">
+        <button class="share-icon" onclick="shareToTwitter()">𝕏</button>
+        <button class="share-icon" onclick="shareToLinkedIn()">in</button>
+        <button class="share-icon" onclick="copyLink()">🔗</button>
       </div>
       ` : `
       <div class="coming-soon-badge">
@@ -818,6 +831,72 @@ window.handleSubscribe = function (e) {
     status.innerHTML = '<span class="info">You\'re already subscribed!</span>';
   }
 };
+
+// ═══════════════════════════════════════════════════════════════
+// SHARE FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+window.shareContent = function () {
+  const url = window.location.href;
+  const title = 'Mirror Intelligence - Daily AI Briefings';
+
+  if (navigator.share) {
+    navigator.share({ title, url });
+  } else {
+    copyLink();
+  }
+};
+
+window.shareToTwitter = function () {
+  const briefing = BRIEFINGS[currentTopic];
+  const text = encodeURIComponent(`${briefing.keyInsights.headline}\n\nDaily intelligence from 4 AI models: GPT, DeepSeek, Groq, Mistral`);
+  const url = encodeURIComponent('https://brief.activemirror.ai');
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+};
+
+window.shareToLinkedIn = function () {
+  const url = encodeURIComponent('https://brief.activemirror.ai');
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+};
+
+window.copyLink = function () {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    const btn = document.querySelector('.share-icon:last-child');
+    if (btn) {
+      const original = btn.textContent;
+      btn.textContent = '✓';
+      setTimeout(() => btn.textContent = original, 2000);
+    }
+  });
+};
+
+// ═══════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════════
+
+document.addEventListener('keydown', (e) => {
+  // Skip if in input
+  if (e.target.tagName === 'INPUT') return;
+
+  switch (e.key) {
+    case 'h': navigateTo('home'); break;
+    case 'p': navigateTo('predictions'); break;
+    case 'a': navigateTo('about'); break;
+    case 't': navigateTo('terms'); break;
+    case '1': selectTopic(1); break;
+    case '2': selectTopic(2); break;
+    case '3': selectTopic(3); break;
+    case '4': selectTopic(4); break;
+    case '5': selectTopic(5); break;
+    case '6': selectTopic(6); break;
+    case '0': selectTopic(0); break;
+    case 's': shareContent(); break;
+    case '/':
+      e.preventDefault();
+      document.getElementById('email-input')?.focus();
+      break;
+  }
+});
 
 // ═══════════════════════════════════════════════════════════════
 // MAIN RENDER
