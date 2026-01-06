@@ -1,343 +1,258 @@
 /* ═══════════════════════════════════════════════════════════════
-   Mirror Intelligence Portal — Main Application v3.0
+   Mirror Intelligence — Temporal Instrument v5.0
    
-   Enhanced with:
-   - Live real-time clock
-   - Working topic day buttons with historical data
-   - More detailed briefings
-   - Client-side routing for About/Terms
-   - Comprehensive coverage
+   "A daily ritual for decision-makers."
+   
+   Core Philosophy:
+   - Time as first-class citizen
+   - Predictions as living artifacts
+   - The consortium as a council of voices
+   - Sunday is sacred
    ═══════════════════════════════════════════════════════════════ */
 
 import './style.css'
 
 // ═══════════════════════════════════════════════════════════════
-// ROUTER STATE
+// STATE
 // ═══════════════════════════════════════════════════════════════
 
 let currentPage = 'home';
 let currentTopic = new Date().getDay();
+let realityUpdatedAt = new Date();
 
-// Topic schedule
+// Topic schedule — each day has meaning
 const TOPICS = {
-  0: { name: 'Weekly Review', icon: '📊', color: 'gold', description: 'Comprehensive weekly synthesis of all topics' },
-  1: { name: 'AI & Technology', icon: '🤖', color: 'purple', description: 'Artificial intelligence, machine learning, and tech innovation' },
-  2: { name: 'Finance & Markets', icon: '💹', color: 'green', description: 'Stock markets, crypto, investment trends, and economic indicators' },
-  3: { name: 'Geopolitics', icon: '🌍', color: 'blue', description: 'International relations, policy shifts, and global events' },
-  4: { name: 'Science & Health', icon: '🧬', color: 'red', description: 'Medical breakthroughs, biotech, and scientific discoveries' },
-  5: { name: 'Business & Strategy', icon: '📈', color: 'gold', description: 'Corporate moves, startups, M&A, and strategic insights' },
-  6: { name: 'Deep Dive', icon: '🔬', color: 'purple', description: 'In-depth analysis of a trending topic' }
+  0: { name: 'Weekly Review', icon: '◈', color: 'gold', mood: 'grave' },
+  1: { name: 'AI & Compute', icon: '⬡', color: 'cyan' },
+  2: { name: 'Markets & Capital', icon: '◇', color: 'green' },
+  3: { name: 'Power & Geopolitics', icon: '⬢', color: 'rose' },
+  4: { name: 'Science & Health', icon: '○', color: 'cyan' },
+  5: { name: 'Strategy & Business', icon: '△', color: 'amber' },
+  6: { name: 'Deep Dive', icon: '⟡', color: 'gold' }
 };
 
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-// AI Expert Panel
-const AI_PANEL = {
+// The Council — each voice has character
+const COUNCIL = {
   gpt: {
     name: 'GPT-4o',
+    symbol: '◉',
     role: 'Narrative Analyst',
-    icon: '🧠',
-    specialty: 'Identifies narrative shifts, framing patterns, and communication strategies'
+    bias: 'Finds the story beneath the data. Sees patterns in communication.',
+    color: 'cyan'
   },
   deepseek: {
     name: 'DeepSeek R1',
+    symbol: '◈',
     role: 'Facts & Metrics',
-    icon: '📊',
-    specialty: 'Extracts concrete numbers, specifications, and quantifiable data'
+    bias: 'Extracts concrete numbers. Distrusts vague claims.',
+    color: 'green'
   },
   groq: {
-    name: 'Llama 3.3 70B',
+    name: 'Llama 3.3',
+    symbol: '△',
     role: 'Signal Filter',
-    icon: '🎯',
-    specialty: 'Separates hype from durable change, identifies what will matter in 6 months'
+    bias: 'Separates hype from durable change. Thinks in 6-month windows.',
+    color: 'amber'
   },
   mistral: {
     name: 'Mistral',
-    role: 'Contrarian View',
-    icon: '💭',
-    specialty: 'Finds overlooked angles, counter-narratives, and dissenting perspectives'
+    symbol: '◇',
+    role: 'Contrarian Voice',
+    bias: 'Finds what everyone is missing. Comfortable with dissent.',
+    color: 'rose'
   }
 };
 
 // ═══════════════════════════════════════════════════════════════
-// BRIEFING DATA STORE (per topic)
+// BRIEFING DATA — The Intelligence
 // ═══════════════════════════════════════════════════════════════
 
 const BRIEFINGS = {
-  // Monday - AI & Technology (Today's LIVE data)
   1: {
     date: 'January 6, 2026',
-    lastUpdated: new Date().toISOString(),
-    articleCount: 8,
-    modelCount: 4,
-    keyInsights: {
-      headline: 'AI Industry Shifts from Hype to Pragmatism',
-      subheadline: 'Mega IPOs worth $3 trillion signal market confidence while open-weight models democratize access'
-    },
-    executiveSummary: `The AI industry is undergoing a significant transformation in early 2026. After years of hype-driven growth, we're witnessing a shift toward pragmatic, real-world applications. Three mega-IPOs (SpaceX, OpenAI, Anthropic) are poised to reshape capital markets with a combined $3 trillion valuation. Meanwhile, open-weight models like DeepSeek R1 are democratizing access to frontier AI capabilities, challenging the oligopoly of major tech companies.`,
+    updated: new Date(),
+    sources: 8,
+    models: 4,
+    headline: 'The Industry Pivots from Spectacle to Substance',
+    subline: 'Mega IPOs approach. Open models democratize. The hype cycle ends.',
+    summary: `The AI industry is undergoing a fundamental transformation. After years of scaling-first approaches, 2026 marks the pivot to real-world deployment. Three historic IPOs—SpaceX, OpenAI, Anthropic—are poised to reshape capital markets with combined valuations approaching $3 trillion. Meanwhile, open-weight models like DeepSeek R1 challenge the oligopoly, giving anyone access to frontier capabilities without gatekeepers.`,
     sections: {
       changed: [
         {
-          text: 'AI industry transitioning from hype to real-world applications with focus on collaborative roles and practical deployments',
-          detail: 'TechCrunch reports that 2026 marks a pivotal year where AI moves from flashy demos to targeted deployments. The industry is "sobering up" after years of scaling-first approaches.',
-          source: { num: 2, title: 'TechCrunch', url: 'https://techcrunch.com/2026/01/02/in-2026-ai-will-move-from-hype-to-pragmatism/' },
-          expert: 'gpt'
+          text: 'Industry transitioning from demonstration to deployment — practical applications now outpace benchmark improvements',
+          detail: 'TechCrunch reports 2026 as the year AI "sobers up." Targeted deployments replace scaling theater. Real revenue begins to matter.',
+          source: { n: 2, name: 'TechCrunch' },
+          voice: 'gpt'
         },
         {
-          text: 'Mega IPO Year: SpaceX, OpenAI, and Anthropic preparing for public debuts with combined valuation approaching $3 trillion',
-          detail: 'Wall Street is bracing for the most significant milestone in American capital markets history. Each company could individually raise over $20 billion, making these among the largest IPOs ever.',
-          source: { num: 4, title: 'Economic Times', url: 'https://economictimes.indiatimes.com/news/international/us/2026-set-to-be-the-historic-year-of-the-mega-ipo' },
-          expert: 'deepseek'
+          text: 'Mega IPO year confirmed — SpaceX, OpenAI, Anthropic preparing public debuts with combined $3T+ valuation potential',
+          detail: 'Each company could individually raise $20+ billion, making these among the largest public offerings in history.',
+          source: { n: 4, name: 'Economic Times' },
+          voice: 'deepseek'
         },
         {
-          text: 'Open-Weight Models Surge: DeepSeek R1 and similar models enable top-tier AI performance without relying on OpenAI, Google, or Anthropic',
-          detail: 'MIT Technology Review highlights that open-weight models allow anyone to download and run frontier-level AI locally. This is democratizing access and reducing dependence on major tech gatekeepers.',
-          source: { num: 1, title: 'MIT Technology Review', url: 'https://www.technologyreview.com/2026/01/05/1130662/whats-next-for-ai-in-2026/' },
-          expert: 'gpt'
+          text: 'Open-weight models surge — DeepSeek R1 enables frontier performance without dependency on major tech gatekeepers',
+          detail: 'MIT Technology Review highlights the democratization: download, run locally, no API calls required.',
+          source: { n: 1, name: 'MIT Tech Review' },
+          voice: 'gpt'
         },
         {
-          text: 'Agentic AI Evolution: Moving beyond task automation to become collaborative, independent partners in workflows',
-          detail: 'Future tech predictions indicate AI is no longer just answering questions but actively collaborating with humans. In medicine, software development, and manufacturing, AI is amplifying human expertise.',
-          source: { num: 7, title: 'Tech Times', url: 'https://www.techtimes.com/articles/313559/20251231/top-technology-trends-that-will-shape-2026' },
-          expert: 'groq'
-        },
-        {
-          text: 'Regulatory Battles Intensify: U.S.-China competition, innovation vs risk balance dominating policy discussions',
-          detail: 'The Hill reports that AI regulation has become increasingly contentious. Key issues like who decides regulations and how to compete with China don\'t fall along party lines, creating unusual political alignments.',
-          source: { num: 8, title: 'The Hill', url: 'https://thehill.com/policy/technology/5657624-5-key-ai-fights-to-watch-in-2026/' },
-          expert: 'mistral'
+          text: 'Agentic AI evolution — moving beyond task completion to collaborative partnership in complex workflows',
+          detail: 'Medicine, software development, and manufacturing seeing AI as amplifier of expertise, not replacement.',
+          source: { n: 7, name: 'Tech Times' },
+          voice: 'groq'
         }
       ],
       matters: [
         {
-          text: 'Market Confidence: Anticipated IPOs signal strong investor confidence — could reach $20+ billion individual raises',
-          detail: 'The successful completion of these IPOs would validate the AI investment thesis and potentially trigger a new wave of funding into the sector.',
-          source: { num: 5, title: 'Gizmodo', url: 'https://gizmodo.com/2026-is-poised-to-be-the-year-of-the-tech-ipo' },
-          expert: 'deepseek'
+          text: 'Market confidence signal — successful IPOs would validate the thesis and trigger new funding waves',
+          source: { n: 5, name: 'Gizmodo' },
+          voice: 'deepseek'
         },
         {
-          text: 'Technological Democratization: Open-weight models may fundamentally disrupt the AI oligopoly of major tech companies',
-          detail: 'For the first time, individuals and smaller companies can access frontier AI without going through OpenAI, Anthropic, or Google. This shifts power dynamics in the industry.',
-          source: { num: 1, title: 'MIT Technology Review', url: 'https://www.technologyreview.com/2026/01/05/1130662/whats-next-for-ai-in-2026/' },
-          expert: 'gpt'
+          text: 'Power redistribution — open models break concentration, shift advantage to those who deploy well',
+          source: { n: 1, name: 'MIT Tech Review' },
+          voice: 'gpt'
         },
         {
-          text: 'Real-World Impact: AI entering production phase — medicine, software development, manufacturing seeing tangible integration',
-          detail: 'Microsoft News reports that AI is closing gaps in healthcare, learning developer preferences, and transforming collaboration. The focus has shifted from experimentation to deployment.',
-          source: { num: 3, title: 'Microsoft News', url: 'https://news.microsoft.com/source/features/ai/whats-next-in-ai-7-trends-to-watch-in-2026' },
-          expert: 'groq'
+          text: 'Integration phase — medicine, software, manufacturing entering production AI, not experiment AI',
+          source: { n: 3, name: 'Microsoft News' },
+          voice: 'groq'
         }
       ],
       ignore: [
         {
-          text: 'General Optimism: Positive outlook may overlook potential market corrections or AI bubble risks',
-          detail: 'Most coverage presents an optimistic view, but historical patterns suggest caution is warranted when valuations reach these levels.',
-          source: { num: 5, title: 'Gizmodo', url: 'https://gizmodo.com/2026-is-poised-to-be-the-year-of-the-tech-ipo' },
-          expert: 'mistral'
+          text: 'General optimism in coverage may mask correction risks — historical patterns suggest caution',
+          voice: 'mistral'
         },
         {
-          text: 'Collaboration Framing: AI-as-partner narrative downplays job displacement and economic disruption concerns',
-          detail: 'The "AI as collaborator" messaging may be overshadowing legitimate concerns about workforce disruption. Watch for countervailing data on employment impacts.',
-          source: { num: 3, title: 'Microsoft News', url: 'https://news.microsoft.com/source/features/ai/whats-next-in-ai-7-trends-to-watch-in-2026' },
-          expert: 'mistral'
-        },
-        {
-          text: 'Speculative Valuations: $3T combined valuation discussions may not reflect underlying economic realities',
-          detail: 'Valuation discussions often outpace revenue fundamentals. Focus on actual product adoption and revenue metrics rather than market cap projections.',
-          source: { num: 4, title: 'Economic Times', url: 'https://economictimes.indiatimes.com/news/international/us/2026-set-to-be-the-historic-year-of-the-mega-ipo' },
-          expert: 'groq'
+          text: 'Collaboration framing overshadows displacement — watch for countervailing employment data',
+          voice: 'mistral'
         }
       ],
       risks: [
         {
-          text: 'AI Bubble Concern: Overvaluation and unsustainable enthusiasm could lead to significant market correction',
-          detail: 'Gizmodo explicitly raises the question: will 2026 be the year the AI bubble bursts? Current enthusiasm mirrors historical patterns seen before dot-com and crypto crashes.',
-          source: { num: 5, title: 'Gizmodo', url: 'https://gizmodo.com/2026-is-poised-to-be-the-year-of-the-tech-ipo' },
-          expert: 'mistral',
-          severity: 'high'
+          text: 'Bubble concern intensifying — $3T combined valuation discussions echo dot-com patterns',
+          detail: 'Gizmodo explicitly asks: will 2026 be the year the AI bubble bursts?',
+          severity: 'high',
+          voice: 'mistral'
         },
         {
-          text: 'Regulatory Backlash: Increasing scrutiny could hinder AI development, especially in U.S.-China competitive context',
-          detail: 'New regulations in the EU and potential U.S. action could create compliance burdens and slow innovation. Watch for EU AI Act enforcement in Q2.',
-          source: { num: 8, title: 'The Hill', url: 'https://thehill.com/policy/technology/5657624-5-key-ai-fights-to-watch-in-2026/' },
-          expert: 'mistral',
-          severity: 'medium'
+          text: 'Regulatory fragmentation — EU AI Act enforcement Q2 could create compliance burden and slow innovation',
+          severity: 'medium',
+          voice: 'mistral'
         }
       ],
       actions: [
-        { text: 'Monitor AI policy discussions and regulatory changes impacting operations', priority: 'high', timeframe: 'Ongoing' },
-        { text: 'Evaluate IPO implications for investment strategies and partnerships', priority: 'medium', timeframe: 'Q1 2026' },
-        { text: 'Explore open-weight model integration (DeepSeek R1, Llama) for local deployment', priority: 'high', timeframe: 'This week' }
+        { text: 'Monitor regulatory developments in EU and US — compliance timelines becoming concrete', priority: 'high' },
+        { text: 'Evaluate open-weight models for local deployment — R1, Llama integration feasibility', priority: 'high' },
+        { text: 'Assess IPO positioning — direct investment windows may open Q2-Q3', priority: 'medium' }
       ],
       dissent: {
-        text: 'While majority view is optimistic, Gizmodo raises valid concerns about AI bubble burst. Current enthusiasm may not be sustainable — markets have seen similar patterns before dot-com and crypto crashes. The question isn\'t whether a correction will happen, but when and how severe.',
-        source: { num: 5, title: 'Gizmodo', url: 'https://gizmodo.com/2026-is-poised-to-be-the-year-of-the-tech-ipo' },
-        expert: 'mistral'
+        text: 'The majority view is optimistic, but this mirrors patterns before corrections. The question is not whether a correction occurs, but when and how severe. Gizmodo raises this explicitly: current enthusiasm may not be sustainable.',
+        voice: 'mistral',
+        source: { n: 5, name: 'Gizmodo' }
       }
     }
-  },
-
-  // Sample data for other days (would be populated by consortium)
-  2: {
-    date: 'January 7, 2026',
-    lastUpdated: null,
-    articleCount: 0,
-    modelCount: 0,
-    keyInsights: {
-      headline: 'Finance & Markets Brief Coming Tomorrow',
-      subheadline: 'Consortium will analyze financial news on Tuesday'
-    },
-    executiveSummary: 'This briefing will be generated tomorrow (Tuesday) focusing on stock markets, cryptocurrency, economic indicators, and investment trends.',
-    sections: { changed: [], matters: [], ignore: [], risks: [], actions: [], dissent: null }
-  },
-  3: {
-    date: 'January 8, 2026',
-    lastUpdated: null,
-    articleCount: 0,
-    modelCount: 0,
-    keyInsights: {
-      headline: 'Geopolitics Brief Coming Wednesday',
-      subheadline: 'International relations and policy analysis'
-    },
-    executiveSummary: 'This briefing will be generated on Wednesday focusing on geopolitics, international relations, and global policy shifts.',
-    sections: { changed: [], matters: [], ignore: [], risks: [], actions: [], dissent: null }
-  },
-  4: {
-    date: 'January 9, 2026',
-    lastUpdated: null,
-    articleCount: 0,
-    modelCount: 0,
-    keyInsights: {
-      headline: 'Science & Health Brief Coming Thursday',
-      subheadline: 'Medical breakthroughs and scientific discoveries'
-    },
-    executiveSummary: 'This briefing will be generated on Thursday focusing on science, health, biotech, and medical research.',
-    sections: { changed: [], matters: [], ignore: [], risks: [], actions: [], dissent: null }
-  },
-  5: {
-    date: 'January 10, 2026',
-    lastUpdated: null,
-    articleCount: 0,
-    modelCount: 0,
-    keyInsights: {
-      headline: 'Business & Strategy Brief Coming Friday',
-      subheadline: 'Corporate moves and strategic insights'
-    },
-    executiveSummary: 'This briefing will be generated on Friday focusing on business strategy, M&A, startups, and corporate news.',
-    sections: { changed: [], matters: [], ignore: [], risks: [], actions: [], dissent: null }
-  },
-  6: {
-    date: 'January 11, 2026',
-    lastUpdated: null,
-    articleCount: 0,
-    modelCount: 0,
-    keyInsights: {
-      headline: 'Deep Dive Coming Saturday',
-      subheadline: 'In-depth analysis of a trending topic'
-    },
-    executiveSummary: 'Saturday deep dives explore one topic in comprehensive detail, with extended analysis and historical context.',
-    sections: { changed: [], matters: [], ignore: [], risks: [], actions: [], dissent: null }
-  },
-  0: {
-    date: 'January 5, 2026',
-    lastUpdated: null,
-    articleCount: 0,
-    modelCount: 0,
-    keyInsights: {
-      headline: 'Weekly Review Coming Sunday',
-      subheadline: 'Comprehensive synthesis of the week\'s insights'
-    },
-    executiveSummary: 'Sunday reviews synthesize the entire week\'s briefings into a comprehensive overview with key takeaways and strategic recommendations.',
-    sections: { changed: [], matters: [], ignore: [], risks: [], actions: [], dissent: null }
   }
 };
 
+// Generate empty briefings for other days
+[0, 2, 3, 4, 5, 6].forEach(day => {
+  BRIEFINGS[day] = {
+    date: '',
+    updated: null,
+    sources: 0,
+    models: 0,
+    headline: `${TOPICS[day].name} Brief`,
+    subline: `Scheduled for ${DAYS[day]}`,
+    summary: '',
+    sections: { changed: [], matters: [], ignore: [], risks: [], actions: [], dissent: null }
+  };
+});
+
+// Predictions as living artifacts
 const PREDICTIONS = [
   {
-    id: 'pred-20260106-001',
-    text: 'OpenAI IPO will value the company at $200B+ within Q2 2026',
+    id: 'p-001',
+    text: 'OpenAI IPO will value company at $200B+ within Q2 2026',
+    state: 'strengthening',
     confidence: 'high',
     timeframe: '6 months',
-    basis: 'Based on $3T combined valuation signals and market appetite. Reported preparations for largest tech IPOs ever.',
-    expert: 'deepseek',
-    created: '2026-01-06'
+    basis: 'Based on $3T combined signals and preparation reports.',
+    voice: 'deepseek',
+    created: '2026-01-06',
+    momentum: 0.7
   },
   {
-    id: 'pred-20260106-002',
-    text: 'Open-weight models will capture 30%+ of enterprise AI deployments by end of 2026',
+    id: 'p-002',
+    text: 'Open-weight models capture 30%+ of enterprise AI deployments by end of 2026',
+    state: 'neutral',
     confidence: 'medium',
     timeframe: '12 months',
-    basis: 'R1 performance approaching frontier models. Cost advantages and privacy benefits driving enterprise adoption.',
-    expert: 'gpt',
-    created: '2026-01-06'
+    basis: 'R1 performance approaching frontier. Cost and privacy advantages.',
+    voice: 'gpt',
+    created: '2026-01-06',
+    momentum: 0
   },
   {
-    id: 'pred-20260106-003',
-    text: 'At least one major AI company will face significant regulatory action in the U.S. or EU',
+    id: 'p-003',
+    text: 'Major AI company faces significant regulatory action in US or EU',
+    state: 'neutral',
     confidence: 'medium',
     timeframe: '12 months',
-    basis: 'Intensifying regulatory battles, bipartisan policy conflicts. EU AI Act enforcement begins Q2.',
-    expert: 'mistral',
-    created: '2026-01-06'
-  },
-  {
-    id: 'pred-20260106-004',
-    text: 'AI-related market correction of 15-25% will occur if IPO expectations are not met',
-    confidence: 'low',
-    timeframe: '18 months',
-    basis: 'Historical bubble patterns, valuation concerns raised by analysts. Similar to dot-com and crypto patterns.',
-    expert: 'groq',
-    created: '2026-01-06'
+    basis: 'Intensifying policy conflicts. EU AI Act enforcement begins Q2.',
+    voice: 'mistral',
+    created: '2026-01-06',
+    momentum: 0.2
   }
 ];
 
 const SOURCES = [
-  { num: 1, title: "What's next for AI in 2026", domain: 'MIT Technology Review', url: 'https://www.technologyreview.com/2026/01/05/1130662/whats-next-for-ai-in-2026/', tier: 1 },
-  { num: 2, title: 'AI will move from hype to pragmatism', domain: 'TechCrunch', url: 'https://techcrunch.com/2026/01/02/in-2026-ai-will-move-from-hype-to-pragmatism/', tier: 1 },
-  { num: 3, title: '7 AI trends to watch in 2026', domain: 'Microsoft News', url: 'https://news.microsoft.com/source/features/ai/whats-next-in-ai-7-trends-to-watch-in-2026', tier: 2 },
-  { num: 4, title: '2026 set to be historic IPO year', domain: 'Economic Times', url: 'https://economictimes.indiatimes.com/news/international/us/2026-set-to-be-the-historic-year-of-the-mega-ipo', tier: 1 },
-  { num: 5, title: 'Year of Tech IPO or AI Bubble Burst?', domain: 'Gizmodo', url: 'https://gizmodo.com/2026-is-poised-to-be-the-year-of-the-tech-ipo', tier: 2 },
-  { num: 6, title: "What's next for AI in 2026", domain: 'MIT Technology Review', url: 'https://www.technologyreview.com/2026/01/05/1130662/whats-next-for-ai-in-2026/', tier: 1 },
-  { num: 7, title: 'Top Technology Trends 2026', domain: 'Tech Times', url: 'https://www.techtimes.com/articles/313559/20251231/top-technology-trends-that-will-shape-2026', tier: 2 },
-  { num: 8, title: '5 key AI fights to watch in 2026', domain: 'The Hill', url: 'https://thehill.com/policy/technology/5657624-5-key-ai-fights-to-watch-in-2026/', tier: 1 }
+  { n: 1, title: "What's next for AI in 2026", domain: 'technologyreview.com', tier: 1 },
+  { n: 2, title: 'AI moves from hype to pragmatism', domain: 'techcrunch.com', tier: 1 },
+  { n: 3, title: '7 AI trends to watch', domain: 'microsoft.com', tier: 2 },
+  { n: 4, title: '2026: Year of the Mega IPO', domain: 'economictimes.com', tier: 1 },
+  { n: 5, title: 'Tech IPO or Bubble Burst?', domain: 'gizmodo.com', tier: 2 },
+  { n: 7, title: 'Technology Trends 2026', domain: 'techtimes.com', tier: 2 },
+  { n: 8, title: '5 AI fights to watch', domain: 'thehill.com', tier: 1 }
 ];
 
 // ═══════════════════════════════════════════════════════════════
-// LIVE TIME CLOCK
+// TIME UTILITIES — First-Class Citizen
 // ═══════════════════════════════════════════════════════════════
 
-function formatLiveTime() {
+function formatRealityAge() {
   const now = new Date();
-  return now.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true
-  });
+  const diff = now - realityUpdatedAt;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
-function formatDate() {
-  return new Date().toLocaleDateString('en-US', {
+function formatDate(date = new Date()) {
+  return date.toLocaleDateString('en-US', {
     weekday: 'long',
+    year: 'numeric',
     month: 'long',
-    day: 'numeric',
-    year: 'numeric'
+    day: 'numeric'
   });
 }
 
-function startClock() {
-  const updateClock = () => {
-    const clockEl = document.getElementById('live-clock');
-    const dateEl = document.getElementById('live-date');
-    if (clockEl) clockEl.textContent = formatLiveTime();
-    if (dateEl) dateEl.textContent = formatDate();
-  };
-  updateClock();
-  setInterval(updateClock, 1000);
+function startRealityClock() {
+  setInterval(() => {
+    const el = document.getElementById('reality-age');
+    if (el) el.textContent = `Reality updated ${formatRealityAge()}`;
+  }, 30000);
 }
 
 // ═══════════════════════════════════════════════════════════════
-// RENDER FUNCTIONS
+// RENDER — The Instrument
 // ═══════════════════════════════════════════════════════════════
 
 function renderHeader() {
@@ -345,443 +260,188 @@ function renderHeader() {
     <header>
       <div class="header-content">
         <a href="#" class="logo" onclick="navigateTo('home'); return false;">
-          <img src="/logo.png" alt="Active Mirror" class="logo-img" />
-          <div class="logo-text">Mirror <span>Intelligence</span></div>
+          <div class="logo-mark"><img src="/logo.png" alt="" /></div>
+          <span class="logo-text">Mirror <span>Intelligence</span></span>
         </a>
-        <nav>
-          <a href="#" onclick="navigateTo('home'); return false;" class="${currentPage === 'home' ? 'active' : ''}">Today's Brief</a>
-          <a href="#" onclick="navigateTo('predictions'); return false;" class="${currentPage === 'predictions' ? 'active' : ''}">Predictions</a>
-          <a href="#" onclick="navigateTo('about'); return false;" class="${currentPage === 'about' ? 'active' : ''}">How It Works</a>
-          <a href="#" onclick="navigateTo('terms'); return false;" class="${currentPage === 'terms' ? 'active' : ''}">Terms</a>
-        </nav>
-        <div class="header-actions">
-          <button class="share-btn" onclick="shareContent()" title="Share">📤</button>
-          <button class="print-btn" onclick="window.print()" title="Print">🖨️</button>
+        
+        <div class="reality-status">
+          <span class="reality-pulse"></span>
+          <span id="reality-age">Reality updated ${formatRealityAge()}</span>
         </div>
+        
+        <nav>
+          <a href="#" onclick="navigateTo('home'); return false;" class="${currentPage === 'home' ? 'active' : ''}">Today</a>
+          <a href="#" onclick="navigateTo('predictions'); return false;" class="${currentPage === 'predictions' ? 'active' : ''}">Predictions</a>
+          <a href="#" onclick="navigateTo('archive'); return false;" class="${currentPage === 'archive' ? 'active' : ''}">Archive</a>
+          <a href="#" onclick="navigateTo('about'); return false;" class="${currentPage === 'about' ? 'active' : ''}">Method</a>
+        </nav>
       </div>
     </header>
   `;
 }
 
 function renderHero() {
-  const briefing = BRIEFINGS[currentTopic];
-  const topic = TOPICS[currentTopic];
-  const isEmpty = briefing.articleCount === 0;
-
-  // Calculate reading time
-  const readingTime = isEmpty ? 0 : Math.ceil(briefing.executiveSummary.split(' ').length / 200 * 3);
+  const b = BRIEFINGS[currentTopic];
+  const t = TOPICS[currentTopic];
+  const isEmpty = b.sources === 0;
 
   return `
     <section class="hero">
-      <div class="live-time-bar">
-        <span class="live-indicator">🔴 LIVE</span>
-        <span id="live-date">${formatDate()}</span>
-        <span id="live-clock">${formatLiveTime()}</span>
-        ${!isEmpty ? `<span class="reading-time">📖 ${readingTime} min read</span>` : ''}
-      </div>
-      <h1>${topic.icon} ${briefing.keyInsights.headline}</h1>
-      <p>${briefing.keyInsights.subheadline}</p>
+      <div class="hero-date ghost-text">${formatDate()}</div>
+      <h1>${b.headline}</h1>
+      <p class="hero-subline">${b.subline}</p>
       ${!isEmpty ? `
-      <div class="hero-stats">
-        <div class="stat">
-          <span class="stat-num">${briefing.articleCount}</span>
-          <span class="stat-label">Sources Analyzed</span>
+        <div class="hero-metrics">
+          <div class="metric">
+            <span class="metric-value">${b.sources}</span>
+            <span class="metric-label">Sources</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">${b.models}</span>
+            <span class="metric-label">Models</span>
+          </div>
+          <div class="metric">
+            <span class="metric-value">${PREDICTIONS.length}</span>
+            <span class="metric-label">Active Predictions</span>
+          </div>
         </div>
-        <div class="stat">
-          <span class="stat-num">${briefing.modelCount}</span>
-          <span class="stat-label">AI Analysts</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num">$3T</span>
-          <span class="stat-label">IPO Valuations</span>
-        </div>
-      </div>
-      <div class="share-bar">
-        <button class="share-icon" onclick="shareToTwitter()">𝕏</button>
-        <button class="share-icon" onclick="shareToLinkedIn()">in</button>
-        <button class="share-icon" onclick="copyLink()">🔗</button>
-      </div>
-      ` : `
-      <div class="coming-soon-badge">
-        <span>📅</span> Briefing scheduled for ${topic.name} day
-      </div>
-      `}
+      ` : ''}
     </section>
   `;
 }
 
-function renderTopicCalendar() {
+function renderTopicNav() {
   const today = new Date().getDay();
 
-  const days = [1, 2, 3, 4, 5, 6, 0].map(dayNum => {
-    const topic = TOPICS[dayNum];
-    const isActive = dayNum === currentTopic;
-    const isToday = dayNum === today;
-    const briefing = BRIEFINGS[dayNum];
-    const hasData = briefing && briefing.articleCount > 0;
+  return `
+    <div class="topic-nav">
+      ${[1, 2, 3, 4, 5, 6, 0].map(day => {
+    const t = TOPICS[day];
+    const isActive = day === currentTopic;
+    const isFuture = day > today && day !== 0;
+    const hasData = BRIEFINGS[day].sources > 0;
 
     return `
-      <div class="topic-day ${isActive ? 'active' : ''} ${!hasData ? 'no-data' : ''}" 
-           data-day="${dayNum}" 
-           onclick="selectTopic(${dayNum})">
-        <span class="day-name">${DAY_NAMES[dayNum]}${isToday ? ' •' : ''}</span>
-        <span class="topic-icon">${topic.icon}</span>
-        <span class="topic-name">${topic.name}</span>
-        ${hasData ? '<span class="has-data">✓</span>' : '<span class="no-data-badge">—</span>'}
-      </div>
-    `;
-  }).join('');
-
-  return `<div class="topic-calendar">${days}</div>`;
+          <div class="topic-day ${isActive ? 'active' : ''} ${isFuture ? 'future' : ''}"
+               onclick="selectTopic(${day})">
+            <span class="day-abbr">${DAYS[day]}</span>
+            <span class="day-icon">${t.icon}</span>
+            <span class="day-topic">${t.name}</span>
+          </div>
+        `;
+  }).join('')}
+    </div>
+  `;
 }
 
-function renderExpertBadge(expertKey) {
-  const expert = AI_PANEL[expertKey];
-  if (!expert) return '';
-  return `<span class="expert-badge" title="${expert.specialty}">${expert.icon} ${expert.name}</span>`;
+function renderVoiceBadge(voiceKey) {
+  const v = COUNCIL[voiceKey];
+  if (!v) return '';
+  return `<span class="expert-badge"><span style="color: var(--signal-${v.color})">${v.symbol}</span> ${v.name}</span>`;
 }
 
-function renderBriefingSection(title, icon, items, sectionClass = '') {
+function renderSection(title, icon, items, type = '') {
   if (!items || items.length === 0) return '';
-
-  const listItems = items.map(item => `
-    <li class="${sectionClass}">
-      <div class="item-content">
-        <span class="item-text">${item.text}</span>
-        ${item.source ? `<a href="${item.source.url}" class="citation" target="_blank" title="${item.source.title}">[${item.source.num}]</a>` : ''}
-      </div>
-      ${item.detail ? `<div class="item-detail">${item.detail}</div>` : ''}
-      <div class="item-meta">
-        ${item.expert ? renderExpertBadge(item.expert) : ''}
-        ${item.severity ? `<span class="severity ${item.severity}">${item.severity.toUpperCase()}</span>` : ''}
-        ${item.priority ? `<span class="priority ${item.priority}">${item.priority.toUpperCase()}</span>` : ''}
-        ${item.timeframe ? `<span class="timeframe-badge">⏱️ ${item.timeframe}</span>` : ''}
-      </div>
-    </li>
-  `).join('');
 
   return `
     <div class="briefing-section">
       <div class="section-header">
         <span class="section-icon">${icon}</span>
         <span class="section-title">${title}</span>
-        <span class="section-count">${items.length} items</span>
+        <span class="section-count">${items.length}</span>
       </div>
       <div class="section-content">
-        <ul>${listItems}</ul>
+        <ul>
+          ${items.map(item => `
+            <li class="${type} ${item.severity ? `risk-${item.severity}` : ''}">
+              <div class="item-text">
+                ${item.text}
+                ${item.source ? `<a href="#" class="citation">[${item.source.n}]</a>` : ''}
+              </div>
+              ${item.detail ? `<div class="item-detail">${item.detail}</div>` : ''}
+              <div class="item-meta">
+                ${item.voice ? renderVoiceBadge(item.voice) : ''}
+                ${item.priority ? `<span class="confidence ${item.priority}">${item.priority}</span>` : ''}
+              </div>
+            </li>
+          `).join('')}
+        </ul>
       </div>
     </div>
   `;
 }
 
-function renderBriefingCard() {
-  const briefing = BRIEFINGS[currentTopic];
-  const topic = TOPICS[currentTopic];
-  const isEmpty = briefing.articleCount === 0;
+function renderBriefing() {
+  const b = BRIEFINGS[currentTopic];
+  const t = TOPICS[currentTopic];
 
-  if (isEmpty) {
+  if (b.sources === 0) {
     return `
-      <article class="briefing-card empty-state fade-in">
-        <div class="empty-icon">${topic.icon}</div>
-        <h2>No Briefing Yet for ${topic.name}</h2>
-        <p>${topic.description}</p>
-        <p class="empty-hint">This briefing will be generated on the scheduled day. Check back later!</p>
-      </article>
+      <div class="briefing">
+        <div class="briefing-card" style="text-align: center; padding: 4rem 2rem;">
+          <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">${t.icon}</div>
+          <h2 style="margin-bottom: 0.5rem;">${t.name}</h2>
+          <p class="ghost-text">Briefing scheduled for ${DAYS[currentTopic]}</p>
+        </div>
+      </div>
     `;
   }
 
   return `
-    <article class="briefing-card fade-in" id="briefing">
-      <div class="briefing-header">
-        <div class="briefing-title">
-          <div class="briefing-icon">${topic.icon}</div>
-          <div>
-            <h2>${topic.name} Brief</h2>
-            <div class="briefing-date">${briefing.date}</div>
+    <div class="briefing">
+      <div class="briefing-card">
+        <div class="briefing-header">
+          <div class="briefing-title-group">
+            <h2><span class="icon">${t.icon}</span> ${t.name}</h2>
+            <div class="briefing-meta mono">${b.date} · ${b.sources} sources · ${b.models} models</div>
           </div>
         </div>
-        <div class="briefing-meta">
-          <span class="meta-badge">📰 ${briefing.articleCount} sources</span>
-          <span class="meta-badge">🤖 ${briefing.modelCount} AI analysts</span>
+        
+        <div class="executive-summary">
+          <h3>Executive Summary</h3>
+          <p>${b.summary}</p>
         </div>
-      </div>
-      
-      <div class="executive-summary">
-        <h3>📋 Executive Summary</h3>
-        <p>${briefing.executiveSummary}</p>
-      </div>
-      
-      ${renderBriefingSection('What Changed Today', '📊', briefing.sections.changed)}
-      ${renderBriefingSection('Why It Matters', '⚡', briefing.sections.matters)}
-      ${renderBriefingSection('Safe to Ignore', '🔇', briefing.sections.ignore)}
-      ${renderBriefingSection('Risks & Drift Detected', '⚠️', briefing.sections.risks, 'risk-item')}
-      ${renderBriefingSection('Recommended Actions', '🎯', briefing.sections.actions, 'action-item')}
-      
-      ${briefing.sections.dissent ? `
-      <div class="briefing-section dissent-section">
-        <div class="section-header">
-          <span class="section-icon">💭</span>
-          <span class="section-title">Dissenting View</span>
-        </div>
-        <div class="dissent-content">
-          <p>${briefing.sections.dissent.text}</p>
-          <div class="dissent-meta">
-            ${renderExpertBadge(briefing.sections.dissent.expert)}
-            <a href="${briefing.sections.dissent.source.url}" class="citation" target="_blank">[${briefing.sections.dissent.source.num}] ${briefing.sections.dissent.source.title}</a>
-          </div>
-        </div>
-      </div>
-      ` : ''}
-    </article>
-  `;
-}
-
-function renderExpertPanel() {
-  const panels = Object.entries(AI_PANEL).map(([key, expert]) => `
-    <div class="expert-card">
-      <div class="expert-icon">${expert.icon}</div>
-      <div class="expert-info">
-        <div class="expert-name">${expert.name}</div>
-        <div class="expert-role">${expert.role}</div>
-        <div class="expert-specialty">${expert.specialty}</div>
-      </div>
-    </div>
-  `).join('');
-
-  return `
-    <div class="panel-card fade-in delay-3" id="panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <span class="icon">🧠</span>
-          AI Expert Panel
-        </div>
-      </div>
-      <div class="expert-grid">
-        ${panels}
-      </div>
-    </div>
-  `;
-}
-
-function renderPredictions() {
-  const predictions = PREDICTIONS.map(pred => `
-    <div class="prediction-item">
-      <div class="prediction-text">${pred.text}</div>
-      <div class="prediction-basis">${pred.basis}</div>
-      <div class="prediction-meta">
-        ${renderExpertBadge(pred.expert)}
-        <span class="confidence ${pred.confidence}">${pred.confidence.toUpperCase()}</span>
-        <span class="timeframe">⏱️ ${pred.timeframe}</span>
-      </div>
-    </div>
-  `).join('');
-
-  return `
-    <div class="panel-card fade-in delay-1" id="predictions">
-      <div class="panel-header">
-        <div class="panel-title">
-          <span class="icon">🔮</span>
-          Predictions
-        </div>
-        <span class="accuracy-badge">Tracking ${PREDICTIONS.length} active</span>
-      </div>
-      ${predictions}
-    </div>
-  `;
-}
-
-function renderSources() {
-  const sources = SOURCES.map(source => `
-    <div class="source-item">
-      <span class="source-num">[${source.num}]</span>
-      <span class="source-tier tier-${source.tier}">T${source.tier}</span>
-      <a href="${source.url}" class="source-title" target="_blank">${source.title}</a>
-      <span class="source-domain">${source.domain}</span>
-    </div>
-  `).join('');
-
-  return `
-    <div class="panel-card fade-in delay-2" id="sources">
-      <div class="panel-header">
-        <div class="panel-title">
-          <span class="icon">📚</span>
-          Sources (${SOURCES.length})
-        </div>
-      </div>
-      <div class="sources-list">
-        ${sources}
-      </div>
-      <div class="source-tier-legend">
-        <span class="tier-legend"><span class="tier-dot tier-1"></span> Tier 1: Primary sources</span>
-        <span class="tier-legend"><span class="tier-dot tier-2"></span> Tier 2: Aggregators</span>
-      </div>
-    </div>
-  `;
-}
-
-function renderAboutPage() {
-  return `
-    <div class="page-content about-page fade-in">
-      <h1>⟡ How Mirror Intelligence Works</h1>
-      
-      <section class="about-section">
-        <h2>🎯 What We Do</h2>
-        <p>Mirror Intelligence is a <strong>multi-AI consortium</strong> that synthesizes daily intelligence briefings from real-time news sources. Unlike single-model AI assistants, we leverage <strong>4 specialized AI models</strong>, each contributing unique analytical perspectives.</p>
-      </section>
-      
-      <section class="about-section">
-        <h2>🔄 Daily Process</h2>
-        <ol>
-          <li><strong>Web Search:</strong> We scan 50+ sources for the day's most relevant news</li>
-          <li><strong>Source Selection:</strong> Articles are ranked by credibility (Tier 1/2/3)</li>
-          <li><strong>Multi-Model Analysis:</strong> 4 AI models analyze the news through different lenses</li>
-          <li><strong>Synthesis:</strong> A final model synthesizes insights into actionable intelligence</li>
-          <li><strong>Human Review:</strong> Content is reviewed before publication</li>
-        </ol>
-      </section>
-      
-      <section class="about-section">
-        <h2>🧠 Our AI Panel</h2>
-        <div class="expert-grid about-expert-grid">
-          ${Object.entries(AI_PANEL).map(([key, expert]) => `
-            <div class="expert-card">
-              <div class="expert-icon">${expert.icon}</div>
-              <div class="expert-info">
-                <div class="expert-name">${expert.name}</div>
-                <div class="expert-role">${expert.role}</div>
-                <div class="expert-specialty">${expert.specialty}</div>
-              </div>
+        
+        ${renderSection('What Changed', '◉', b.sections.changed)}
+        ${renderSection('Why It Matters', '◈', b.sections.matters)}
+        ${renderSection('Safe to Ignore', '○', b.sections.ignore, 'dim')}
+        ${renderSection('Risks Detected', '△', b.sections.risks, 'risk')}
+        ${renderSection('Recommended Actions', '→', b.sections.actions, 'action')}
+        
+        ${b.sections.dissent ? `
+          <div class="briefing-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-subtle);">
+            <div class="section-header">
+              <span class="section-icon">◇</span>
+              <span class="section-title" style="color: var(--signal-rose);">Dissenting View</span>
             </div>
-          `).join('')}
-        </div>
-      </section>
-      
-      <section class="about-section">
-        <h2>📅 Topic Schedule</h2>
-        <table class="about-table">
-          <tbody>
-            ${Object.entries(TOPICS).map(([day, topic]) => `
-              <tr>
-                <td><strong>${DAY_NAMES[day]}</strong></td>
-                <td>${topic.icon} ${topic.name}</td>
-                <td>${topic.description}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </section>
-      
-      <section class="about-section">
-        <h2>📊 Source Tiers</h2>
-        <ul>
-          <li><strong>Tier 1:</strong> Primary sources — original journalism, official announcements, peer-reviewed research</li>
-          <li><strong>Tier 2:</strong> Aggregators — reputable tech blogs, industry publications</li>
-          <li><strong>Tier 3:</strong> Secondary — social media, forums, community sources</li>
-        </ul>
-      </section>
-      
-      <section class="about-section">
-        <h2>🔮 Prediction Tracking</h2>
-        <p>We make specific, falsifiable predictions and track their accuracy over time. Each prediction includes:</p>
-        <ul>
-          <li><strong>Confidence Level:</strong> High / Medium / Low</li>
-          <li><strong>Timeframe:</strong> When we expect resolution</li>
-          <li><strong>Basis:</strong> Evidence supporting the prediction</li>
-          <li><strong>Expert:</strong> Which AI model contributed the prediction</li>
-        </ul>
-      </section>
-      
-      <section class="about-section">
-        <h2>🏗️ Built By</h2>
-        <p>Mirror Intelligence is a project by <a href="https://activemirror.ai" target="_blank">Active Mirror</a>, exploring the intersection of AI, identity, and collaborative intelligence.</p>
-      </section>
-    </div>
-  `;
-}
-
-function renderTermsPage() {
-  return `
-    <div class="page-content terms-page fade-in">
-      <h1>📜 Terms of Service & Disclaimers</h1>
-      
-      <section class="terms-section">
-        <h2>⚠️ Important Disclaimers</h2>
-        <div class="disclaimer-box">
-          <p><strong>Not Investment Advice:</strong> The content on Mirror Intelligence is for informational purposes only. It does not constitute investment, financial, legal, or professional advice. Always consult qualified professionals before making decisions.</p>
-        </div>
-        <div class="disclaimer-box">
-          <p><strong>AI-Generated Content:</strong> All briefings are generated by AI models and may contain errors, biases, or outdated information. We make no guarantees regarding accuracy, completeness, or timeliness.</p>
-        </div>
-        <div class="disclaimer-box">
-          <p><strong>Predictions Are Speculative:</strong> Our predictions are experimental forecasts, not guarantees. Past prediction accuracy does not guarantee future performance.</p>
-        </div>
-      </section>
-      
-      <section class="terms-section">
-        <h2>📋 Terms of Use</h2>
-        <h3>1. Acceptance</h3>
-        <p>By accessing Mirror Intelligence, you accept these terms. If you disagree, please discontinue use.</p>
-        
-        <h3>2. Use of Content</h3>
-        <p>Content may be shared with attribution. Commercial use requires permission.</p>
-        
-        <h3>3. No Warranty</h3>
-        <p>We provide this service "as is" without warranties of any kind.</p>
-        
-        <h3>4. Limitation of Liability</h3>
-        <p>We are not liable for any damages arising from your use of this service or reliance on its content.</p>
-        
-        <h3>5. Changes to Terms</h3>
-        <p>We may modify these terms at any time. Continued use constitutes acceptance.</p>
-      </section>
-      
-      <section class="terms-section">
-        <h2>🔒 Privacy</h2>
-        <p>We do not collect personal data. We use minimal analytics to understand usage patterns. No cookies are used for tracking.</p>
-      </section>
-      
-      <section class="terms-section">
-        <h2>📧 Contact</h2>
-        <p>Questions? Contact us at <a href="mailto:legal@activemirror.ai">legal@activemirror.ai</a></p>
-      </section>
-      
-      <p class="terms-updated">Last updated: January 6, 2026</p>
-    </div>
-  `;
-}
-
-function renderPredictionsPage() {
-  return `
-    <div class="page-content predictions-page fade-in">
-      <h1>🔮 Prediction Tracker</h1>
-      <p class="page-intro">We make specific, falsifiable predictions and track their outcomes. Transparency builds trust.</p>
-      
-      <div class="prediction-stats">
-        <div class="pred-stat">
-          <span class="pred-stat-num">${PREDICTIONS.length}</span>
-          <span class="pred-stat-label">Active Predictions</span>
-        </div>
-        <div class="pred-stat">
-          <span class="pred-stat-num">—</span>
-          <span class="pred-stat-label">Accuracy Rate</span>
-        </div>
-        <div class="pred-stat">
-          <span class="pred-stat-num">0</span>
-          <span class="pred-stat-label">Resolved</span>
-        </div>
+            <p style="color: var(--text-secondary); font-style: italic; margin-bottom: 1rem;">
+              "${b.sections.dissent.text}"
+            </p>
+            <div class="item-meta">
+              ${renderVoiceBadge(b.sections.dissent.voice)}
+              ${b.sections.dissent.source ? `<a href="#" class="citation">[${b.sections.dissent.source.n}] ${b.sections.dissent.source.name}</a>` : ''}
+            </div>
+          </div>
+        ` : ''}
       </div>
-      
-      <h2>Active Predictions</h2>
-      <div class="predictions-list">
-        ${PREDICTIONS.map(pred => `
-          <div class="prediction-card">
-            <div class="prediction-text-large">${pred.text}</div>
-            <div class="prediction-basis">${pred.basis}</div>
-            <div class="prediction-meta-large">
-              ${renderExpertBadge(pred.expert)}
-              <span class="confidence ${pred.confidence}">${pred.confidence.toUpperCase()}</span>
-              <span class="timeframe">⏱️ ${pred.timeframe}</span>
-              <span class="created">Created: ${pred.created}</span>
+    </div>
+  `;
+}
+
+function renderCouncil() {
+  return `
+    <div class="panel-section">
+      <div class="panel-header">
+        <span class="panel-title">The Council</span>
+      </div>
+      <div class="council-grid">
+        ${Object.entries(COUNCIL).map(([key, v]) => `
+          <div class="council-voice">
+            <div class="voice-symbol" style="color: var(--signal-${v.color})">${v.symbol}</div>
+            <div class="voice-info">
+              <div class="voice-name">${v.name}</div>
+              <div class="voice-role">${v.role}</div>
+              <div class="voice-bias">${v.bias}</div>
             </div>
           </div>
         `).join('')}
@@ -790,113 +450,137 @@ function renderPredictionsPage() {
   `;
 }
 
+function renderPredictions() {
+  return `
+    <div class="panel-section">
+      <div class="panel-header">
+        <span class="panel-title">Living Predictions</span>
+        <span class="ghost-text">${PREDICTIONS.length} active</span>
+      </div>
+      ${PREDICTIONS.map(p => `
+        <div class="prediction-item ${p.state}">
+          <div class="prediction-text">${p.text}</div>
+          <div class="prediction-basis">${p.basis}</div>
+          <div class="prediction-meta">
+            ${renderVoiceBadge(p.voice)}
+            <span class="confidence ${p.confidence}">${p.confidence}</span>
+            <span class="timeframe mono">${p.timeframe}</span>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderSources() {
+  return `
+    <div class="panel-section">
+      <div class="panel-header">
+        <span class="panel-title">Sources</span>
+        <span class="ghost-text">${SOURCES.length} cited</span>
+      </div>
+      ${SOURCES.map(s => `
+        <div class="source-item">
+          <span class="source-num mono">[${s.n}]</span>
+          <span class="source-tier tier-${s.tier}">T${s.tier}</span>
+          <a href="#" class="source-title">${s.title}</a>
+          <span class="source-domain mono">${s.domain}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
 function renderFooter() {
   return `
     <footer>
-      <div class="newsletter-signup">
-        <h3>📬 Get Daily Briefings</h3>
-        <p>No spam. Just intelligence.</p>
+      <div class="footer-subscribe">
+        <h3>Daily Intelligence</h3>
+        <p class="ghost-text">No noise. Just signal.</p>
         <form class="subscribe-form" onsubmit="handleSubscribe(event)">
           <input type="email" id="email-input" placeholder="your@email.com" required />
-          <button type="submit" class="btn btn-primary">Subscribe</button>
+          <button type="submit" class="btn-subscribe">Subscribe</button>
         </form>
         <div id="subscribe-status"></div>
       </div>
       <div class="footer-links">
-        <a href="#" onclick="navigateTo('about'); return false;">How It Works</a>
-        <a href="#" onclick="navigateTo('terms'); return false;">Terms & Disclaimers</a>
-        <a href="/feed.xml" target="_blank">RSS Feed</a>
+        <a href="#" onclick="navigateTo('about'); return false;">Methodology</a>
+        <a href="#" onclick="navigateTo('terms'); return false;">Terms</a>
+        <a href="/feed.xml" target="_blank">RSS</a>
         <a href="https://activemirror.ai" target="_blank">Active Mirror</a>
       </div>
-      <p>⟡ Generated by Multi-AI Consortium • GPT-4o • DeepSeek R1 • Llama 3.3 • Mistral</p>
-      <p class="footer-disclaimer">For informational purposes only. Not investment advice.</p>
+      <p class="footer-credit">Generated by consortium: GPT-4o · DeepSeek R1 · Llama 3.3 · Mistral</p>
+      <p class="footer-disclaimer">For orientation, not investment. The future is not guaranteed.</p>
     </footer>
   `;
 }
 
-// Email subscription handler
-window.handleSubscribe = function (e) {
-  e.preventDefault();
-  const email = document.getElementById('email-input').value;
-  const status = document.getElementById('subscribe-status');
+function renderAboutPage() {
+  return `
+    <div style="max-width: 800px; margin: 0 auto; padding: 4rem 2rem;">
+      <h1 style="margin-bottom: 2rem;">The Method</h1>
+      
+      <div class="executive-summary" style="margin-bottom: 3rem;">
+        <p>Mirror Intelligence is a temporal instrument. It does not predict the future—it tracks the present as it becomes the future. Events move from possible → probable → inevitable. We help you see that motion.</p>
+      </div>
+      
+      <h2 style="margin-bottom: 1rem;">The Daily Process</h2>
+      <ol style="color: var(--text-secondary); margin-bottom: 3rem; padding-left: 1.5rem;">
+        <li style="margin-bottom: 0.5rem;"><strong>Gather:</strong> Scan 50+ sources for signal</li>
+        <li style="margin-bottom: 0.5rem;"><strong>Filter:</strong> Rank by credibility (Tier 1/2/3)</li>
+        <li style="margin-bottom: 0.5rem;"><strong>Analyze:</strong> Four AI voices examine from different angles</li>
+        <li style="margin-bottom: 0.5rem;"><strong>Synthesize:</strong> Produce intelligence, not information</li>
+        <li style="margin-bottom: 0.5rem;"><strong>Predict:</strong> Make falsifiable claims with accountability</li>
+      </ol>
+      
+      <h2 style="margin-bottom: 1rem;">The Council</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 2rem;">We use multiple AI models not for redundancy, but for perspective. Each has a bias—that's the point.</p>
+      
+      ${renderCouncil()}
+      
+      <h2 style="margin: 3rem 0 1rem;">Why Predictions Matter</h2>
+      <p style="color: var(--text-secondary);">Most intelligence products never commit. They analyze but never predict. We believe accountability builds trust. Every prediction is tracked. Misses are public. This is how trust compounds.</p>
+    </div>
+  `;
+}
 
-  // Store email locally (in production, would send to backend)
-  const subscribers = JSON.parse(localStorage.getItem('subscribers') || '[]');
-  if (!subscribers.includes(email)) {
-    subscribers.push(email);
-    localStorage.setItem('subscribers', JSON.stringify(subscribers));
-    status.innerHTML = '<span class="success">✓ Subscribed! You\'ll receive daily briefings at 6 AM.</span>';
-    document.getElementById('email-input').value = '';
-  } else {
-    status.innerHTML = '<span class="info">You\'re already subscribed!</span>';
-  }
-};
-
-// ═══════════════════════════════════════════════════════════════
-// SHARE FUNCTIONS
-// ═══════════════════════════════════════════════════════════════
-
-window.shareContent = function () {
-  const url = window.location.href;
-  const title = 'Mirror Intelligence - Daily AI Briefings';
-
-  if (navigator.share) {
-    navigator.share({ title, url });
-  } else {
-    copyLink();
-  }
-};
-
-window.shareToTwitter = function () {
-  const briefing = BRIEFINGS[currentTopic];
-  const text = encodeURIComponent(`${briefing.keyInsights.headline}\n\nDaily intelligence from 4 AI models: GPT, DeepSeek, Groq, Mistral`);
-  const url = encodeURIComponent('https://brief.activemirror.ai');
-  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-};
-
-window.shareToLinkedIn = function () {
-  const url = encodeURIComponent('https://brief.activemirror.ai');
-  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
-};
-
-window.copyLink = function () {
-  navigator.clipboard.writeText(window.location.href).then(() => {
-    const btn = document.querySelector('.share-icon:last-child');
-    if (btn) {
-      const original = btn.textContent;
-      btn.textContent = '✓';
-      setTimeout(() => btn.textContent = original, 2000);
-    }
-  });
-};
-
-// ═══════════════════════════════════════════════════════════════
-// KEYBOARD SHORTCUTS
-// ═══════════════════════════════════════════════════════════════
-
-document.addEventListener('keydown', (e) => {
-  // Skip if in input
-  if (e.target.tagName === 'INPUT') return;
-
-  switch (e.key) {
-    case 'h': navigateTo('home'); break;
-    case 'p': navigateTo('predictions'); break;
-    case 'a': navigateTo('about'); break;
-    case 't': navigateTo('terms'); break;
-    case '1': selectTopic(1); break;
-    case '2': selectTopic(2); break;
-    case '3': selectTopic(3); break;
-    case '4': selectTopic(4); break;
-    case '5': selectTopic(5); break;
-    case '6': selectTopic(6); break;
-    case '0': selectTopic(0); break;
-    case 's': shareContent(); break;
-    case '/':
-      e.preventDefault();
-      document.getElementById('email-input')?.focus();
-      break;
-  }
-});
+function renderPredictionsPage() {
+  return `
+    <div style="max-width: 1000px; margin: 0 auto; padding: 4rem 2rem;">
+      <h1 style="margin-bottom: 1rem;">Prediction Tracker</h1>
+      <p class="ghost-text" style="margin-bottom: 3rem;">We make specific, falsifiable predictions and track their outcomes. Transparency builds trust.</p>
+      
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-bottom: 3rem;">
+        <div class="panel-section" style="text-align: center;">
+          <div style="font-size: 2.5rem; font-weight: 600; color: var(--text-primary);">${PREDICTIONS.length}</div>
+          <div class="ghost-text">Active</div>
+        </div>
+        <div class="panel-section" style="text-align: center;">
+          <div style="font-size: 2.5rem; font-weight: 600; color: var(--text-primary);">—</div>
+          <div class="ghost-text">Accuracy</div>
+        </div>
+        <div class="panel-section" style="text-align: center;">
+          <div style="font-size: 2.5rem; font-weight: 600; color: var(--text-primary);">0</div>
+          <div class="ghost-text">Resolved</div>
+        </div>
+      </div>
+      
+      <h2 style="margin-bottom: 1rem;">Active Predictions</h2>
+      ${PREDICTIONS.map(p => `
+        <div class="prediction-item ${p.state}" style="margin-bottom: 1rem;">
+          <div class="prediction-text" style="font-size: 1.1rem;">${p.text}</div>
+          <div class="prediction-basis" style="margin: 1rem 0;">${p.basis}</div>
+          <div class="prediction-meta">
+            ${renderVoiceBadge(p.voice)}
+            <span class="confidence ${p.confidence}">${p.confidence}</span>
+            <span class="timeframe mono">⏱ ${p.timeframe}</span>
+            <span class="ghost-text">Created ${p.created}</span>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // MAIN RENDER
@@ -908,13 +592,13 @@ function render() {
   if (currentPage === 'home') {
     content = `
       ${renderHero()}
-      ${renderTopicCalendar()}
+      ${renderTopicNav()}
       <main>
-        <div class="content-grid">
-          ${renderBriefingCard()}
-          <aside class="predictions-panel">
+        <div class="instrument-grid">
+          ${renderBriefing()}
+          <aside class="council-panel">
             ${renderPredictions()}
-            ${renderExpertPanel()}
+            ${renderCouncil()}
             ${renderSources()}
           </aside>
         </div>
@@ -922,25 +606,37 @@ function render() {
     `;
   } else if (currentPage === 'about') {
     content = `<main>${renderAboutPage()}</main>`;
-  } else if (currentPage === 'terms') {
-    content = `<main>${renderTermsPage()}</main>`;
   } else if (currentPage === 'predictions') {
     content = `<main>${renderPredictionsPage()}</main>`;
+  } else if (currentPage === 'terms') {
+    content = `<main style="max-width: 800px; margin: 0 auto; padding: 4rem 2rem;">
+      <h1>Terms & Disclaimers</h1>
+      <div class="executive-summary" style="margin-top: 2rem;">
+        <p><strong>Not Investment Advice:</strong> This is intelligence, not recommendation. Consult professionals before acting.</p>
+      </div>
+      <div class="executive-summary" style="border-left-color: var(--signal-amber);">
+        <p><strong>AI-Generated:</strong> All content is produced by AI models and may contain errors. We are transparent about predictions, including misses.</p>
+      </div>
+      <div class="executive-summary" style="border-left-color: var(--signal-rose);">
+        <p><strong>Predictions Are Speculative:</strong> Past accuracy does not guarantee future performance. The future is not guaranteed.</p>
+      </div>
+    </main>`;
   }
 
   document.querySelector('#app').innerHTML = `
-    <div class="bg-pattern"></div>
-    <div class="grid-overlay"></div>
+    <div class="void-layer"></div>
+    <div class="void-grain"></div>
+    <div class="void-pulse"></div>
     ${renderHeader()}
     ${content}
     ${renderFooter()}
   `;
 
-  startClock();
+  startRealityClock();
 }
 
 // ═══════════════════════════════════════════════════════════════
-// NAVIGATION
+// NAVIGATION & HANDLERS
 // ═══════════════════════════════════════════════════════════════
 
 window.navigateTo = function (page) {
@@ -949,11 +645,47 @@ window.navigateTo = function (page) {
   window.scrollTo(0, 0);
 };
 
-window.selectTopic = function (dayNum) {
-  currentTopic = dayNum;
+window.selectTopic = function (day) {
+  currentTopic = day;
   currentPage = 'home';
   render();
 };
+
+window.handleSubscribe = function (e) {
+  e.preventDefault();
+  const email = document.getElementById('email-input').value;
+  const status = document.getElementById('subscribe-status');
+
+  const subs = JSON.parse(localStorage.getItem('subs') || '[]');
+  if (!subs.includes(email)) {
+    subs.push(email);
+    localStorage.setItem('subs', JSON.stringify(subs));
+    status.innerHTML = '<span style="color: var(--signal-green)">Subscribed. Intelligence arrives at 6 AM.</span>';
+    document.getElementById('email-input').value = '';
+  } else {
+    status.innerHTML = '<span style="color: var(--signal-amber)">Already subscribed.</span>';
+  }
+};
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+
+  const keys = {
+    'h': () => navigateTo('home'),
+    'p': () => navigateTo('predictions'),
+    'a': () => navigateTo('about'),
+    '1': () => selectTopic(1),
+    '2': () => selectTopic(2),
+    '3': () => selectTopic(3),
+    '4': () => selectTopic(4),
+    '5': () => selectTopic(5),
+    '6': () => selectTopic(6),
+    '0': () => selectTopic(0),
+  };
+
+  if (keys[e.key]) keys[e.key]();
+});
 
 // Initialize
 render();
