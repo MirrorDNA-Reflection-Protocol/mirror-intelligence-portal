@@ -1123,10 +1123,29 @@ function renderLivePage() {
             <div><span style="color: #666;">UPTIME:</span> <span id="stat-uptime" style="color: #888;">00:00</span></div>
           </div>
           
-          <!-- Activity Graph -->
-          <div style="height: 100px; margin-bottom: 0.5rem; border: 1px solid #222; background: rgba(0,10,0,0.3); position: relative; overflow: hidden;">
-            <canvas id="activity-graph" style="width: 100%; height: 100%;"></canvas>
-            <div style="position: absolute; top: 4px; left: 8px; font-size: 0.6rem; color: #444;">ACTIVITY</div>
+          <!-- Activity Graph with Legend -->
+          <div style="margin-bottom: 0.5rem;">
+            <!-- Graph Title & Legend -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <div style="font-size: 0.7rem; color: #888;">
+                <span style="color: #aaa;">REAL-TIME INFERENCE LOAD</span>
+                <span style="color: #555; margin-left: 0.5rem;">(simulated)</span>
+              </div>
+              <div style="display: flex; gap: 0.75rem; font-size: 0.6rem;">
+                <span style="display: flex; align-items: center; gap: 3px;"><span style="width: 8px; height: 8px; background: #5eaab5; border-radius: 50%;"></span>GPT</span>
+                <span style="display: flex; align-items: center; gap: 3px;"><span style="width: 8px; height: 8px; background: #4a8c6f; border-radius: 50%;"></span>DeepSeek</span>
+                <span style="display: flex; align-items: center; gap: 3px;"><span style="width: 8px; height: 8px; background: #c4a35a; border-radius: 50%;"></span>Groq</span>
+                <span style="display: flex; align-items: center; gap: 3px;"><span style="width: 8px; height: 8px; background: #b38a4a; border-radius: 50%;"></span>Mistral</span>
+                <span style="display: flex; align-items: center; gap: 3px;"><span style="width: 8px; height: 8px; background: #a162f7; border-radius: 50%;"></span>Swarm</span>
+              </div>
+            </div>
+            <!-- The Graph -->
+            <div style="height: 120px; border: 1px solid #222; background: rgba(0,10,0,0.3); position: relative; overflow: hidden;">
+              <canvas id="activity-graph" style="width: 100%; height: 100%;"></canvas>
+              <!-- Y-axis labels -->
+              <div style="position: absolute; top: 8px; left: 4px; font-size: 0.55rem; color: #444;">HIGH</div>
+              <div style="position: absolute; bottom: 8px; left: 4px; font-size: 0.55rem; color: #444;">LOW</div>
+            </div>
           </div>
           
           <!-- Terminal Output -->
