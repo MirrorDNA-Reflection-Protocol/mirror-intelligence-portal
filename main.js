@@ -1124,7 +1124,7 @@ function renderLivePage() {
           </div>
           
           <!-- Activity Graph -->
-          <div style="height: 60px; margin-bottom: 0.5rem; border: 1px solid #222; background: rgba(0,10,0,0.3); position: relative; overflow: hidden;">
+          <div style="height: 100px; margin-bottom: 0.5rem; border: 1px solid #222; background: rgba(0,10,0,0.3); position: relative; overflow: hidden;">
             <canvas id="activity-graph" style="width: 100%; height: 100%;"></canvas>
             <div style="position: absolute; top: 4px; left: 8px; font-size: 0.6rem; color: #444;">ACTIVITY</div>
           </div>
@@ -1183,8 +1183,7 @@ function initLiveTerminal() {
   function addLine(log) {
     const line = document.createElement('div');
     line.style.marginBottom = '0.5rem';
-    line.style.opacity = '0';
-    line.style.animation = 'fadeIn 0.2s forwards';
+    line.style.opacity = '1';
 
     const ts = new Date().toISOString().split('T')[1].split('.')[0];
 
