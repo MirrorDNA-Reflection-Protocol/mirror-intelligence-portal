@@ -1,224 +1,76 @@
 {
     "meta": {
         "date": "Wednesday, January 07, 2026",
-        "generated": "2026-01-07T06:25:57.141353Z"
+        "generated": "2026-01-07T07:22:07.800174Z",
+        "version": "2.0-living-mind"
     },
-    "briefing": {
-        "headline": "Daily Intelligence Brief",
-        "subline": "Today's synthesis",
-        "summary": "Council synthesis in progress.",
+    "mind": {
+        "deltas": [],
+        "update": {
+            "matters": "AI's transition from hype to practical tools clashes with persistent supply chain fragility and data privacy nightmares.",
+            "confidence": "Losing faith in \"AI as salvation\" while gaining clarity that edge computing and decentralized tools (like Qwen on Raspberry Pi) are reshaping power dynamics.",
+            "unresolved": "Can we ethically weaponize AI's image-generation capabilities without normalizing surveillance and deepfake tyranny?"
+        },
+        "beliefs": [
+            {
+                "id": "belief-1",
+                "statement": "The Architect identifies and prioritizes structural shifts over transient noise.",
+                "status": "strengthening",
+                "confidence": 95,
+                "last_challenged": "2026-01-07",
+                "evidence_for": "Initial synthesis",
+                "evidence_against": "Pending review",
+                "history": [
+                    {
+                        "date": "2026-01-07",
+                        "value": 95,
+                        "context": null
+                    }
+                ]
+            },
+            {
+                "id": "belief-2",
+                "statement": "The internal model is the sole framework for decision-making, independent of external distractions.",
+                "status": "strengthening",
+                "confidence": 90,
+                "last_challenged": "2026-01-07",
+                "evidence_for": "Initial synthesis",
+                "evidence_against": "Pending review",
+                "history": [
+                    {
+                        "date": "2026-01-07",
+                        "value": 90,
+                        "context": null
+                    }
+                ]
+            }
+        ],
+        "risks": [
+            {
+                "id": "risk-1767770355.413148-1",
+                "text": "Supply Chain Vulnerabilities in Critical Infrastructure",
+                "status": "developing",
+                "compounding_factor": "If this continues, cascading failures in energy, communication, or defense systems could occur due to compromised components.",
+                "severity": "high"
+            },
+            {
+                "id": "risk-1767770355.413365-2",
+                "text": "AI-Generated Deepfakes and Data Harvesting",
+                "status": "developing",
+                "compounding_factor": "If this compounds, widespread misinformation and privacy breaches could erode trust in digital systems, destabilizing institutions and enabling mass surveillance.",
+                "severity": "high"
+            }
+        ],
+        "council": {
+            "topic": "Context Interpretation",
+            "architect": "AI's transition from hype to practical tools clashes with persistent supply chain fragility and data privacy nightmares.",
+            "skeptic": "Supply Chain Vulnerabilities in Critical Infrastructure",
+            "historian": "This matches the cyclical pattern of hype vs reality.",
+            "conclusion": "Monitor the signal."
+        },
         "stats": {
-            "sources": 5,
-            "models": 4
-        },
-        "sections": {
-            "changed": [
-                {
-                    "text": "OpenAI releases GPT Image 1.5 for detailed image editing",
-                    "detail": "The tool enables advanced conversational image manipulation, raising concerns about synthetic media creation.",
-                    "source": {
-                        "n": 1,
-                        "name": "Ars Technica",
-                        "url": null,
-                        "tier": 1
-                    },
-                    "voice": "gpt",
-                    "severity": null,
-                    "priority": null
-                },
-                {
-                    "text": "Browser extensions harvest AI conversation data",
-                    "detail": "Chromium extensions collect extended AI chat histories, sparking privacy and data security debates.",
-                    "source": {
-                        "n": 2,
-                        "name": "Ars Technica",
-                        "url": null,
-                        "tier": 1
-                    },
-                    "voice": "gpt",
-                    "severity": null,
-                    "priority": null
-                },
-                {
-                    "text": "Microsoft disrupts Snapdragon Dev Kit access",
-                    "detail": "A developer claims Microsoft\u2019s actions halted their Snapdragon hardware development, impacting edge AI innovation.",
-                    "source": {
-                        "n": 3,
-                        "name": "Hacker News",
-                        "url": null,
-                        "tier": 1
-                    },
-                    "voice": "gpt",
-                    "severity": null,
-                    "priority": null
-                },
-                {
-                    "text": "Qwen 30B model runs on Raspberry Pi",
-                    "detail": "A large language model achieves real-time performance on low-cost hardware, signaling advancements in edge computing.",
-                    "source": {
-                        "n": 4,
-                        "name": "Hacker News",
-                        "url": null,
-                        "tier": 1
-                    },
-                    "voice": "gpt",
-                    "severity": null,
-                    "priority": null
-                },
-                {
-                    "text": "Trans flag emoji standardized as 5-codepoint sequence",
-                    "detail": "The emoji\u2019s design choice reflects technical constraints and cultural considerations in Unicode standardization.",
-                    "source": {
-                        "n": 5,
-                        "name": "Hacker News",
-                        "url": null,
-                        "tier": 1
-                    },
-                    "voice": "gpt",
-                    "severity": null,
-                    "priority": null
-                }
-            ],
-            "matters": [],
-            "risks": [
-                {
-                    "text": "Long-term data harvesting by browser extensions",
-                    "detail": null,
-                    "source": null,
-                    "voice": "mistral",
-                    "severity": "high",
-                    "priority": null
-                },
-                {
-                    "text": "Corporate hardware obsolescence undermining developer ecosystems",
-                    "detail": null,
-                    "source": null,
-                    "voice": "mistral",
-                    "severity": "medium",
-                    "priority": null
-                }
-            ],
-            "actions": [],
-            "ignore": [
-                {
-                    "text": "OpenAI\u2019s GPT Image 1.5",
-                    "detail": null,
-                    "source": null,
-                    "voice": "groq",
-                    "severity": null,
-                    "priority": null
-                },
-                {
-                    "text": "Browser extensions harvesting AI conversations",
-                    "detail": null,
-                    "source": null,
-                    "voice": "groq",
-                    "severity": null,
-                    "priority": null
-                }
-            ]
+            "sources": 0,
+            "models": 3
         }
-    },
-    "predictions": [
-        {
-            "id": "p-1",
-            "text": "OpenAI IPOs before Q3 2026",
-            "state": "strengthening",
-            "timeframe": "6 months",
-            "confidence": "High",
-            "probability": {
-                "base_rate": 35,
-                "updated": 72,
-                "range": [
-                    65,
-                    80
-                ],
-                "decay": "Q3 2026"
-            },
-            "reasoning": {
-                "gpt": {
-                    "position": "supports",
-                    "argument": "CFO hiring spree signals standard pre-IPO prep.",
-                    "would_change": "If Altman delays S-1 filing past March."
-                },
-                "deepseek": {
-                    "position": "supports",
-                    "argument": "Revenue metrics require public capital to sustain training run rates.",
-                    "would_change": "Private sovereign wealth injection >$50B."
-                },
-                "groq": {
-                    "position": "neutral",
-                    "argument": "Timing market is tricky; might wait for rate cuts.",
-                    "would_change": "Fed pivots hawkish."
-                },
-                "mistral": {
-                    "position": "skeptical",
-                    "argument": "Regulatory headwinds usually delay these timelines.",
-                    "would_change": "FTC clears antitrust probe early."
-                }
-            },
-            "evidence": [
-                {
-                    "type": "primary",
-                    "text": "Confirmation of new CFO (ex-Goldman)."
-                },
-                {
-                    "type": "quant",
-                    "text": "$11B annualized revenue run rate reported."
-                },
-                {
-                    "type": "analog",
-                    "text": "Compare to Facebook 2012 timeline relative to revenue maturity."
-                }
-            ]
-        },
-        {
-            "id": "p-2",
-            "text": "Apple releases 'Search' product in 2026",
-            "state": "weakening",
-            "timeframe": "12 months",
-            "confidence": "Low",
-            "probability": {
-                "base_rate": 10,
-                "updated": 25,
-                "range": [
-                    15,
-                    35
-                ],
-                "decay": "WWDC 2026"
-            },
-            "reasoning": {
-                "gpt": {
-                    "position": "skeptical",
-                    "argument": "Google deal is too lucrative ($20B/yr) to risk antitrust fire.",
-                    "would_change": "DOJ forces Google breakup."
-                },
-                "deepseek": {
-                    "position": "skeptical",
-                    "argument": "No capex spike in Apple server spend correlates to search index.",
-                    "would_change": "Massive data center capex announcement."
-                },
-                "groq": {
-                    "position": "neutral",
-                    "argument": "They might launch a 'Summarizer' and call it search.",
-                    "would_change": "N/A"
-                },
-                "mistral": {
-                    "position": "supports",
-                    "argument": "They effectively already have it in Spotlight; just needs branding.",
-                    "would_change": "iOS 20 leak showing 'Apple Search' icon."
-                }
-            },
-            "evidence": [
-                {
-                    "type": "quant",
-                    "text": "Google pays ~$20B/year for default slot."
-                },
-                {
-                    "type": "primary",
-                    "text": "Eddy Cue testimony in DOJ trial suggests 'no need' to build."
-                }
-            ]
-        }
-    ]
+    }
 }

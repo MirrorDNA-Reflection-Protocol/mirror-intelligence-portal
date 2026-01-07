@@ -1,0 +1,224 @@
+{
+    "meta": {
+        "date": "Wednesday, January 07, 2026",
+        "generated": "2026-01-07T06:57:46.696261Z"
+    },
+    "briefing": {
+        "headline": "Daily Intelligence Brief",
+        "subline": "Today's synthesis",
+        "summary": "Council synthesis in progress.",
+        "stats": {
+            "sources": 5,
+            "models": 4
+        },
+        "sections": {
+            "changed": [
+                {
+                    "text": "OpenAI launches GPT Image 1.5 for detailed photo editing",
+                    "detail": "The new tool enables conversational image editing with enhanced detail generation, raising concerns about deepfake capabilities.",
+                    "source": {
+                        "n": 1,
+                        "name": "Ars Technica",
+                        "url": null,
+                        "tier": 1
+                    },
+                    "voice": "gpt",
+                    "severity": null,
+                    "priority": null
+                },
+                {
+                    "text": "Browser extensions harvest extended AI conversations",
+                    "detail": "Chromium extensions with 8 million users collect full AI dialogue over months, sparking privacy and data misuse debates.",
+                    "source": {
+                        "n": 2,
+                        "name": "Ars Technica",
+                        "url": null,
+                        "tier": 1
+                    },
+                    "voice": "gpt",
+                    "severity": null,
+                    "priority": null
+                },
+                {
+                    "text": "Microsoft discontinues Snapdragon Dev Kit support",
+                    "detail": "Developers report Microsoft abruptly ended support for their Snapdragon Dev Kit, disrupting hardware-software integration projects.",
+                    "source": {
+                        "n": 3,
+                        "name": "Hacker News",
+                        "url": null,
+                        "tier": 1
+                    },
+                    "voice": "gpt",
+                    "severity": null,
+                    "priority": null
+                },
+                {
+                    "text": "Qwen 30B model runs in real-time on Raspberry Pi",
+                    "detail": "A 30-billion-parameter model achieves low-latency inference on low-cost hardware, challenging cloud-centric AI deployment norms.",
+                    "source": {
+                        "n": 4,
+                        "name": "Hacker News",
+                        "url": null,
+                        "tier": 1
+                    },
+                    "voice": "gpt",
+                    "severity": null,
+                    "priority": null
+                },
+                {
+                    "text": "High-performance DBMSs adopt io_uring for efficiency",
+                    "detail": "New database systems leverage io_uring for faster I/O operations, optimizing workloads for modern cloud and edge environments.",
+                    "source": {
+                        "n": 5,
+                        "name": "Hacker News",
+                        "url": null,
+                        "tier": 1
+                    },
+                    "voice": "gpt",
+                    "severity": null,
+                    "priority": null
+                }
+            ],
+            "matters": [],
+            "risks": [
+                {
+                    "text": "Prolonged AI conversation data harvesting by browser extensions",
+                    "detail": null,
+                    "source": null,
+                    "voice": "mistral",
+                    "severity": "high",
+                    "priority": null
+                },
+                {
+                    "text": "Unregulated AI model proliferation via low-cost hardware (e.g., Qwen on Raspberry Pi)",
+                    "detail": null,
+                    "source": null,
+                    "voice": "mistral",
+                    "severity": "medium",
+                    "priority": null
+                }
+            ],
+            "actions": [],
+            "ignore": [
+                {
+                    "text": "AI image generation tools (e.g., GPT Image 1.5)",
+                    "detail": null,
+                    "source": null,
+                    "voice": "groq",
+                    "severity": null,
+                    "priority": null
+                },
+                {
+                    "text": "Browser extensions harvesting AI conversations",
+                    "detail": null,
+                    "source": null,
+                    "voice": "groq",
+                    "severity": null,
+                    "priority": null
+                }
+            ]
+        }
+    },
+    "predictions": [
+        {
+            "id": "p-1",
+            "text": "OpenAI IPOs before Q3 2026",
+            "state": "strengthening",
+            "timeframe": "6 months",
+            "confidence": "High",
+            "probability": {
+                "base_rate": 35,
+                "updated": 72,
+                "range": [
+                    65,
+                    80
+                ],
+                "decay": "Q3 2026"
+            },
+            "reasoning": {
+                "gpt": {
+                    "position": "supports",
+                    "argument": "CFO hiring spree signals standard pre-IPO prep.",
+                    "would_change": "If Altman delays S-1 filing past March."
+                },
+                "deepseek": {
+                    "position": "supports",
+                    "argument": "Revenue metrics require public capital to sustain training run rates.",
+                    "would_change": "Private sovereign wealth injection >$50B."
+                },
+                "groq": {
+                    "position": "neutral",
+                    "argument": "Timing market is tricky; might wait for rate cuts.",
+                    "would_change": "Fed pivots hawkish."
+                },
+                "mistral": {
+                    "position": "skeptical",
+                    "argument": "Regulatory headwinds usually delay these timelines.",
+                    "would_change": "FTC clears antitrust probe early."
+                }
+            },
+            "evidence": [
+                {
+                    "type": "primary",
+                    "text": "Confirmation of new CFO (ex-Goldman)."
+                },
+                {
+                    "type": "quant",
+                    "text": "$11B annualized revenue run rate reported."
+                },
+                {
+                    "type": "analog",
+                    "text": "Compare to Facebook 2012 timeline relative to revenue maturity."
+                }
+            ]
+        },
+        {
+            "id": "p-2",
+            "text": "Apple releases 'Search' product in 2026",
+            "state": "weakening",
+            "timeframe": "12 months",
+            "confidence": "Low",
+            "probability": {
+                "base_rate": 10,
+                "updated": 25,
+                "range": [
+                    15,
+                    35
+                ],
+                "decay": "WWDC 2026"
+            },
+            "reasoning": {
+                "gpt": {
+                    "position": "skeptical",
+                    "argument": "Google deal is too lucrative ($20B/yr) to risk antitrust fire.",
+                    "would_change": "DOJ forces Google breakup."
+                },
+                "deepseek": {
+                    "position": "skeptical",
+                    "argument": "No capex spike in Apple server spend correlates to search index.",
+                    "would_change": "Massive data center capex announcement."
+                },
+                "groq": {
+                    "position": "neutral",
+                    "argument": "They might launch a 'Summarizer' and call it search.",
+                    "would_change": "N/A"
+                },
+                "mistral": {
+                    "position": "supports",
+                    "argument": "They effectively already have it in Spotlight; just needs branding.",
+                    "would_change": "iOS 20 leak showing 'Apple Search' icon."
+                }
+            },
+            "evidence": [
+                {
+                    "type": "quant",
+                    "text": "Google pays ~$20B/year for default slot."
+                },
+                {
+                    "type": "primary",
+                    "text": "Eddy Cue testimony in DOJ trial suggests 'no need' to build."
+                }
+            ]
+        }
+    ]
+}
