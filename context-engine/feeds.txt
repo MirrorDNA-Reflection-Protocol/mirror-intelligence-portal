@@ -1,0 +1,32 @@
+# TECHNOLOGY & AI
+https://techcrunch.com/feed/
+https://www.theverge.com/rss/index.xml
+https://arstechnica.com/feed/
+https://www.wired.com/feed/rss
+https://venturebeat.com/feed/
+https://research.google/blog/rss/
+https://www.deepmind.com/blog/rss.xml
+https://news.ycombinator.com/rss
+https://www.artificialintelligence-news.com/feed/
+https://www.technologyreview.com/feed/
+
+# MARKETS & FINANCE
+https://www.ft.com/technology?format=rss
+https://www.marketwatch.com/rss/topstories
+
+# GEOPOLITICS & POLICY
+https://www.foreignaffairs.com/rss.xml
+https://www.aljazeera.com/xml/rss/all.xml
+https://feeds.npr.org/1001/rss.xml
+https://rss.nytimes.com/services/xml/rss/nyt/World.xml
+
+# SCIENCE & ENERGY
+https://www.nature.com/nature.rss
+https://www.science.org/rss/news_current.xml
+https://phys.org/rss-feed/
+
+# SECURITY & CYBER
+https://krebsonsecurity.com/feed/
+https://www.schneier.com/blog/atom.xml
+https://thehackernews.com/feeds/posts/default
+https://www.darkreading.com/rss.xml

@@ -1,0 +1,99 @@
+{
+  "run_id": "20260107_110850",
+  "started_at": "2026-01-07T11:08:50.414612Z",
+  "finished_at": "2026-01-07T11:16:01.918052Z",
+  "status": "complete",
+  "agent_outputs": {
+    "extractor": {
+      "agent_id": "extractor",
+      "model_name": "qwen3:8b",
+      "timestamp": "2026-01-07T11:08:50.414640Z",
+      "prompt": "\nYou are a signal extractor. Your job is to identify concrete, verifiable claims from the input.\nDo NOT interpret or analyze. Just extract.\n\nINPUTS:\nSOURCE: Mozilla Says It\u2019s Finally Done With Two-Faced Onerep\nURL: https://krebsonsecurity.com/2025/11/mozilla-says-its-finally-done-with-two-faced-onerep/\nCONTENT: In March 2024, Mozilla said it was winding down its collaboration with Onerep -- an identity protection service offered with the Firefox web browser that promises to remove users from hun...",
+      "raw_response": "CLAIM: Mozilla is still promoting Onerep despite winding down collaboration in March 2024 | SOURCE: https://krebsonsecurity.com/2025/11/mozilla-says-its-finally-done-with-two-faced-onerep/ | CONFIDENCE: high  \nCLAIM: Superbox media streaming devices require intrusive software that forces user networks to relay traffic for cybercrime activities | SOURCE: https://krebsonsecurity.com/2025/11/is-your-android-tv-streaming-box-part-of-a-botnet/ | CONFIDENCE: high  \nCLAIM: Rey, the admin of \"Scattered LAPSUS$ Hunters,\" confirmed his real identity and agreed to an interview | SOURCE: https://krebsonsecurity.com/2025/11/meet-rey-the-admin-of-scattered-lapsus-hunters/ | CONFIDENCE: high  \nCLAIM: Phishing groups are promoting kits to create fake e-commerce sites for stealing payment card data | SOURCE: https://krebsonsecurity.com/2025/12/sms-phishers-pivot-to-points-taxes-fake-retailers/ | CONFIDENCE: high  \nCLAIM: A $25M academic cheating network is linked to a Kremlin-connected oligarch\u2019s Russian university | SOURCE: https://krebsonsecurity.com/2025/12/drones-to-diplomas-how-russias-largest-private-university-is-linked-to-a-25m-essay-mill/ | CONFIDENCE: high  \n\nSIGNAL: Tech | DIRECTION: down | MAGNITUDE: 9  \nSIGNAL: Tech | DIRECTION: down | MAGNITUDE: 8  \nSIGNAL: Policy | DIRECTION: down | MAGNITUDE: 7",
+      "parsed": {
+        "claims": [
+          {
+            "text": "Mozilla is still promoting Onerep despite winding down collaboration in March 2024",
+            "source": "https://krebsonsecurity.com/2025/11/mozilla-says-its-finally-done-with-two-faced-onerep/",
+            "confidence": "high"
+          },
+          {
+            "text": "Superbox media streaming devices require intrusive software that forces user networks to relay traffic for cybercrime activities",
+            "source": "https://krebsonsecurity.com/2025/11/is-your-android-tv-streaming-box-part-of-a-botnet/",
+            "confidence": "high"
+          },
+          {
+            "text": "Rey, the admin of \"Scattered LAPSUS$ Hunters,\" confirmed his real identity and agreed to an interview",
+            "source": "https://krebsonsecurity.com/2025/11/meet-rey-the-admin-of-scattered-lapsus-hunters/",
+            "confidence": "high"
+          },
+          {
+            "text": "Phishing groups are promoting kits to create fake e-commerce sites for stealing payment card data",
+            "source": "https://krebsonsecurity.com/2025/12/sms-phishers-pivot-to-points-taxes-fake-retailers/",
+            "confidence": "high"
+          },
+          {
+            "text": "A $25M academic cheating network is linked to a Kremlin-connected oligarch\u2019s Russian university",
+            "source": "https://krebsonsecurity.com/2025/12/drones-to-diplomas-how-russias-largest-private-university-is-linked-to-a-25m-essay-mill/",
+            "confidence": "high"
+          }
+        ],
+        "signals": [
+          {
+            "text": "Tech",
+            "direction": "down",
+            "magnitude": 9
+          },
+          {
+            "text": "Tech",
+            "direction": "down",
+            "magnitude": 8
+          },
+          {
+            "text": "Policy",
+            "direction": "down",
+            "magnitude": 7
+          }
+        ]
+      }
+    },
+    "skeptic": {
+      "agent_id": "skeptic",
+      "model_name": "mirrorbrain-ami:latest",
+      "timestamp": "2026-01-07T11:10:01.860836Z",
+      "prompt": "\nYou are a professional skeptic. Your job is to find what could be wrong.\nFor EVERY apparent consensus or trend, you MUST provide a counterargument.\n\nINPUTS:\nSOURCE: Mozilla Says It\u2019s Finally Done With Two-Faced Onerep\nURL: https://krebsonsecurity.com/2025/11/mozilla-says-its-finally-done-with-two-faced-onerep/\nCONTENT: In March 2024, Mozilla said it was winding down its collaboration with Onerep -- an identity protection service offered with the Firefox web browser that promises to remove users...",
+      "raw_response": "ERROR: ",
+      "parsed": {
+        "counters": [],
+        "risks": []
+      }
+    },
+    "analyst": {
+      "agent_id": "analyst",
+      "model_name": "mirrorbrain-ami:latest",
+      "timestamp": "2026-01-07T11:12:01.878214Z",
+      "prompt": "\nYou analyze downstream effects. For each development, ask: \"If this continues, what breaks?\"\n\nINPUTS:\nSOURCE: Mozilla Says It\u2019s Finally Done With Two-Faced Onerep\nURL: https://krebsonsecurity.com/2025/11/mozilla-says-its-finally-done-with-two-faced-onerep/\nCONTENT: In March 2024, Mozilla said it was winding down its collaboration with Onerep -- an identity protection service offered with the Firefox web browser that promises to remove users from hundreds of people-search sites -- after KrebsOnS...",
+      "raw_response": "ERROR: ",
+      "parsed": {
+        "effects": []
+      }
+    },
+    "forecaster": {
+      "agent_id": "forecaster",
+      "model_name": "qwen3:8b",
+      "timestamp": "2026-01-07T11:14:01.894877Z",
+      "prompt": "\nConvert uncertainty into probability. Every forecast must be:\n- Binary (yes/no outcome)\n- Time-bound (specific resolution date)\n- Falsifiable (clear criteria)\n\nINPUTS:\nSOURCE: Mozilla Says It\u2019s Finally Done With Two-Faced Onerep\nURL: https://krebsonsecurity.com/2025/11/mozilla-says-its-finally-done-with-two-faced-onerep/\nCONTENT: In March 2024, Mozilla said it was winding down its collaboration with Onerep -- an identity protection service offered with the Firefox web browser that promises to r...",
+      "raw_response": "ERROR: ",
+      "parsed": {
+        "forecasts": []
+      }
+    }
+  },
+  "synthesis": {
+    "claims_extracted": 5,
+    "counters_generated": 0,
+    "risks_identified": 0,
+    "forecasts_created": 0,
+    "dissent_included": false
+  }
+}
