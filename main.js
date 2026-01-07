@@ -190,26 +190,38 @@ function updateLiveActivityTicker(event) {
 }
 
 function formatEventForTicker(event) {
+  // Epistemic event language - not mechanical
   switch (event.type) {
     case 'ingest_complete':
-      return `Ingested ${event.count || 'N'} sources`;
+      return `Scanned ${event.count || 'multiple'} sources for signals`;
     case 'agent_thinking':
     case 'model_thinking':
-      return `${event.agent_name || event.model_name || 'Agent'} analyzing...`;
+      const agent = event.agent_name || event.model_name || 'Agent';
+      return `${agent} deliberating...`;
     case 'agent_complete':
     case 'model_take':
-      return `${event.agent_name || event.model_name || 'Agent'} completed`;
+      const completeAgent = event.agent_name || event.model_name || 'Agent';
+      return `${completeAgent} rendered judgment`;
     case 'phase_change':
-      return `Phase: ${event.phase}`;
+      const phaseLabels = {
+        'ingesting': 'Scanning sources',
+        'deliberating': 'Multi-agent deliberation active',
+        'synthesizing': 'Synthesizing consensus',
+        'published': 'Analysis published',
+        'idle': 'System idle — watching'
+      };
+      return phaseLabels[event.phase] || `Phase: ${event.phase}`;
     case 'synthesis_complete':
-      return 'Synthesis complete';
+      return 'Consensus synthesis complete';
     case 'pipeline_complete':
     case 'council_complete':
-      return 'Pipeline finished';
+      return 'Deliberation cycle complete — ledger updated';
     case 'dissent_recorded':
-      return `Dissent: ${event.message || 'counter recorded'}`;
+      return `Skeptic challenged confidence (penalty pending)`;
     case 'forecast_updated':
-      return `Forecast updated: ${event.forecast_id || ''}`;
+      return `Forecast probability adjusted`;
+    case 'confidence_shift':
+      return `Confidence shifted: ${event.from}% → ${event.to}%`;
     default:
       return event.message || null;
   }
@@ -378,36 +390,71 @@ function renderMentalModel() {
   const update = MIND?.update;
   if (!update) return '';
 
+  const lastUpdate = MIND?.stats?.last_updated;
+  const confidence = update.confidence || 'No dissent recorded this cycle — confidence unchanged';
+  const unresolved = update.unresolved || 'No unresolved questions surfaced';
+
   return `
     <div class="mental-model-section">
       <div class="section-header">EXECUTIVE MODEL</div>
       <div class="model-card">
         <div class="model-row">
           <span class="model-label">SIGNAL</span>
-          <span class="model-value">${update.matters}</span>
+          <span class="model-value">${update.matters || 'Awaiting signal extraction'}</span>
         </div>
         <div class="model-row">
           <span class="model-label">CONFIDENCE</span>
-          <span class="model-value">${update.confidence}</span>
+          <span class="model-value">${confidence}</span>
         </div>
         <div class="model-row">
           <span class="model-label">UNRESOLVED</span>
-          <span class="model-value">${update.unresolved}</span>
+          <span class="model-value">${unresolved}</span>
         </div>
+        ${lastUpdate ? `<div class="model-timestamp">${formatTimeAgo(lastUpdate)}</div>` : ''}
       </div>
     </div>
   `;
 }
 
 function renderDeliberationPanel() {
+  const lastSession = MIND?.stats?.last_deliberation;
+  const agentsCount = MIND?.stats?.models_participated || 0;
+  const lastUpdate = MIND?.stats?.last_updated;
+
+  // Calculate hours since last deliberation
+  let hoursSince = '--';
+  if (lastUpdate) {
+    const hours = Math.floor((Date.now() - new Date(lastUpdate).getTime()) / (1000 * 60 * 60));
+    hoursSince = hours < 1 ? '<1' : hours;
+  }
+
   return `
     <div class="deliberation-section">
       <div class="section-header">MODEL DELIBERATION</div>
-      <div class="deliberation-container" id="deliberation-container">
-        <div class="deliberation-placeholder">
-          <div class="placeholder-icon">🤖</div>
-          <div>No active deliberation</div>
-          <button class="action-btn" onclick="triggerDeliberation()">Start Deliberation</button>
+      <div class="deliberation-panel">
+        <div class="deliberation-idle">
+          <div class="deliberation-idle-status">● System Idle • Watching</div>
+          
+          <div class="deliberation-idle-meta">
+            <div class="idle-stat">
+              <span class="idle-stat-value">${hoursSince}h</span>
+              <span class="idle-stat-label">Since Last Run</span>
+            </div>
+            <div class="idle-stat">
+              <span class="idle-stat-value">${agentsCount}</span>
+              <span class="idle-stat-label">Agents Involved</span>
+            </div>
+            <div class="idle-stat">
+              <span class="idle-stat-value">${MIND?.risks?.length || 0}</span>
+              <span class="idle-stat-label">Risks Surfaced</span>
+            </div>
+          </div>
+          
+          <div class="deliberation-agents">
+            <strong>Last cycle:</strong> Extractor, Skeptic, Analyst, Forecaster
+          </div>
+          
+          <button class="deliberation-btn" onclick="triggerDeliberation()">Request New Deliberation</button>
         </div>
       </div>
     </div>
@@ -424,28 +471,35 @@ function renderForecasts() {
       <div class="section-header">FORECASTS (${open.length} open, ${resolved.length} resolved)</div>
       
       ${open.length > 0 ? `
-        <div class="forecast-grid">
+        <div class="forecasts-grid">
           ${open.map(f => `
             <div class="forecast-card" onclick="openForecast('${f.id}')">
-              <div class="forecast-prob">${(f.probability * 100).toFixed(0)}%</div>
+              <div class="forecast-prob">${(f.probability * 100).toFixed(0)}</div>
               <div class="forecast-question">${f.question}</div>
+              <div class="forecast-criteria">${f.resolution_criteria || 'Criteria pending'}</div>
               <div class="forecast-meta">
-                <span>Resolves: ${formatDate(f.resolution_date)}</span>
+                <span class="forecast-status open">OPEN</span>
+                <span class="forecast-resolve-date">Resolves ${formatDate(f.resolution_date)}</span>
               </div>
-              <div class="forecast-criteria">${f.resolution_criteria}</div>
+              <div class="forecast-updated">Updated ${formatTimeAgo(f.updated_at || MIND?.stats?.last_updated)}</div>
             </div>
           `).join('')}
         </div>
       ` : '<div class="empty-state">No open forecasts</div>'}
       
       ${resolved.length > 0 ? `
-        <div class="section-subheader">RESOLVED</div>
-        <div class="forecast-grid resolved">
-          ${resolved.map(f => `
-            <div class="forecast-card ${f.outcome ? 'outcome-yes' : 'outcome-no'}" onclick="openForecast('${f.id}')">
-              <div class="forecast-outcome">${f.outcome ? '✓ YES' : '✗ NO'}</div>
+        <div class="section-header" style="margin-top: var(--space-xl);">RESOLVED</div>
+        <div class="forecasts-grid">
+          ${resolved.slice(0, 6).map(f => `
+            <div class="forecast-card" onclick="openForecast('${f.id}')">
+              <div class="forecast-prob" style="color: ${f.outcome ? 'var(--accent-green)' : 'var(--accent-red)'};">
+                ${f.outcome ? '✓' : '✗'}
+              </div>
               <div class="forecast-question">${f.question}</div>
-              <div class="forecast-brier">Brier: ${f.brier_score}</div>
+              <div class="forecast-meta">
+                <span class="forecast-status resolved">${f.outcome ? 'CORRECT' : 'INCORRECT'}</span>
+                <span class="forecast-resolve-date">Brier: ${f.brier_score?.toFixed(3) || 'N/A'}</span>
+              </div>
             </div>
           `).join('')}
         </div>
