@@ -29,16 +29,53 @@ async function init() {
 function renderShell() {
   const app = document.getElementById('app');
   app.innerHTML = `
-    ${renderLiveBar()}
-    ${renderHeader()}
-    ${renderStatusStrip()}
+    <!-- PLANE 1: SIGNAL FIELD -->
+    ${renderSignalField()}
+    
     <div id="content-area">
-      <div class="loading-state">
-        <div class="pulse-ring"></div>
-        <div>Connecting to Truth Engine...</div>
+      <div class="idle-surface">
+        <div class="idle-breathing"></div>
+        <div class="idle-status">⟡ CONNECTING TO TRUTH ENGINE</div>
       </div>
     </div>
+    
     ${renderFooter()}
+  `;
+}
+
+function renderSignalField() {
+  const date = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  });
+
+  const time = formatTime(new Date());
+  const phase = ENGINE_PHASE || 'idle';
+  const isIdle = phase === 'idle' || phase === '--';
+
+  return `
+    <div class="signal-field">
+      <!-- Ambient signal bands -->
+      <div class="signal-band" style="top: 25%"></div>
+      <div class="signal-band" style="top: 50%"></div>
+      <div class="signal-band" style="top: 75%"></div>
+      
+      <!-- Signal particles -->
+      <div class="signal-particle" style="top: 30%; animation-delay: 0s;"></div>
+      <div class="signal-particle" style="top: 50%; animation-delay: 2s;"></div>
+      <div class="signal-particle" style="top: 70%; animation-delay: 4s;"></div>
+      
+      <div class="signal-header">
+        <div class="signal-brand">MIRROR INTELLIGENCE</div>
+        <h1 class="signal-title">Truth Engine</h1>
+        <div class="signal-timestamp">${date}</div>
+        
+        <div class="signal-pulse">
+          <span class="pulse-dot ${isIdle ? 'idle' : ''}"></span>
+          <span class="pulse-label">${isIdle ? 'WATCHING' : phase.toUpperCase()}</span>
+          <span class="pulse-label" style="margin-left: 16px;">${time}</span>
+        </div>
+      </div>
+    </div>
   `;
 }
 
@@ -263,16 +300,24 @@ function render() {
   const content = document.getElementById('content-area');
   if (!content) return;
 
+  // 3-PLANE ARCHITECTURE
   content.innerHTML = `
-    ${renderActivityPanel()}
-    ${renderDeltaTicker()}
-    ${renderMentalModel()}
-    ${renderDeliberationPanel()}
-    ${renderForecasts()}
-    ${renderLedger()}
-    ${renderBeliefs()}
-    ${renderRisks()}
-    ${renderHowItWorks()}
+    <!-- PLANE 2: COGNITIVE SPINE -->
+    <div class="cognitive-spine">
+      ${renderActivityStream()}
+      ${renderStatusReadings()}
+      ${renderExecutiveModel()}
+      ${renderDeltas()}
+    </div>
+    
+    <!-- PLANE 3: COMMIT SURFACE -->
+    <div class="commit-surface">
+      <div class="commit-header">⟡ CRYSTALLIZED TRUTH</div>
+      ${renderForecasts()}
+      ${renderBeliefs()}
+      ${renderRisks()}
+      ${renderLedger()}
+    </div>
   `;
 
   attachEventListeners();
@@ -334,17 +379,59 @@ function renderStatusStrip() {
 }
 
 function renderActivityPanel() {
+  return renderActivityStream();
+}
+
+function renderActivityStream() {
+  const events = ACTIVITY_LOG.slice(0, 8);
+  const isIdle = events.length === 0;
+
   return `
-    <div class="activity-panel" id="activity-panel">
-      <div class="panel-header">
-        <span class="panel-title">⟡ LIVE ACTIVITY</span>
-        <span class="panel-subtitle" id="activity-count">0 events</span>
-      </div>
-      <div class="live-activity-ticker" id="live-activity-ticker">
-        <div class="ticker-idle" id="ticker-idle">No events yet • Waiting for activity</div>
+    <div class="activity-stream">
+      <div class="activity-header">
+        <span class="activity-indicator ${isIdle ? 'idle' : ''}"></span>
+        <span class="activity-title">${isIdle ? 'WATCHING' : 'LIVE EVENTS'}</span>
       </div>
       <div class="activity-feed" id="activity-feed">
-        <div class="activity-empty">Waiting for activity...</div>
+        ${events.length > 0 ? events.map(e => `
+          <div class="activity-event">
+            <span class="event-time">${formatTime(e.timestamp || e.receivedAt)}</span>
+            <span class="event-text">${formatEventForTicker(e) || e.message || e.type}</span>
+          </div>
+        `).join('') : `
+          <div class="activity-event">
+            <span class="event-time">${formatTime(new Date())}</span>
+            <span class="event-text">System idle — monitoring for signals</span>
+          </div>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function renderStatusReadings() {
+  const sources = MIND?.stats?.sources_scanned_24h || MIND?.sources?.length || 0;
+  const forecasts = MIND?.forecasts?.filter(f => f.status === 'open')?.length || 0;
+  const agents = MIND?.stats?.models_participated || 4;
+  const lastUpdate = MIND?.stats?.last_updated;
+
+  return `
+    <div class="status-strip">
+      <div class="status-reading">
+        <span class="reading-value" id="status-sources">${sources}</span>
+        <span class="reading-label">SOURCES</span>
+      </div>
+      <div class="status-reading">
+        <span class="reading-value" id="status-models">${agents}</span>
+        <span class="reading-label">AGENTS</span>
+      </div>
+      <div class="status-reading">
+        <span class="reading-value" id="status-forecasts">${forecasts}</span>
+        <span class="reading-label">FORECASTS</span>
+      </div>
+      <div class="status-reading">
+        <span class="reading-value" id="status-updated">${formatTimeAgo(lastUpdate)}</span>
+        <span class="reading-label">LAST RUN</span>
       </div>
     </div>
   `;
@@ -384,6 +471,15 @@ function renderDeltaTicker() {
       <div class="delta-grid">${items}</div>
     </div>
   `;
+}
+
+// Alias for new structure
+function renderDeltas() {
+  return renderDeltaTicker();
+}
+
+function renderExecutiveModel() {
+  return renderMentalModel();
 }
 
 function renderMentalModel() {
