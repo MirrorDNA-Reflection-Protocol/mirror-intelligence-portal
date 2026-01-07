@@ -27,7 +27,7 @@ ARTIFACTS_DIR.mkdir(exist_ok=True)
 # The Quartet (4 Independent Agents)
 COUNCIL = {
     "extractor": {
-        "model": "qwen3:8b",
+        "model": "mirrorbrain-ami:latest",
         "name": "The Extractor",
         "role": "Signal & Claim Extraction",
         "bias": "Identifies concrete claims, facts, and signals. No interpretation, just extraction."
@@ -45,7 +45,7 @@ COUNCIL = {
         "bias": "Focuses on downstream impacts. If X happens, what breaks? What compounds?"
     },
     "forecaster": {
-        "model": "qwen3:8b",
+        "model": "mirrorbrain-ami:latest",
         "name": "The Forecaster",
         "role": "Probability & Resolution",
         "bias": "Converts uncertainty to probabilities. Specifies exact resolution criteria."
@@ -111,7 +111,7 @@ class CouncilEngine:
         )
         
         try:
-            async with httpx.AsyncClient(timeout=120.0) as client:
+            async with httpx.AsyncClient(timeout=180.0) as client:
                 payload = {
                     "model": config["model"],
                     "prompt": prompt,

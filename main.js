@@ -633,16 +633,29 @@ function updateStatusIndicators(status) {
     if (el) el.textContent = val || '--';
   };
 
-  // Engine phase with fallback
-  const phase = status?.phase || ENGINE_PHASE || 'idle';
+  // Engine phase — AUTHORITATIVE, no fallback
+  // If API doesn't respond, we show nothing (honest)
+  const phase = status?.phase || '--';
+  ENGINE_PHASE = phase; // Sync local for other uses
   set('status-engine', phase.toUpperCase());
+
+  // Show blocked reason if present (state correctness)
+  const blockedEl = document.getElementById('status-blocked');
+  if (blockedEl) {
+    if (status?.blocked_reason) {
+      blockedEl.textContent = status.blocked_reason;
+      blockedEl.style.display = 'block';
+    } else {
+      blockedEl.style.display = 'none';
+    }
+  }
 
   // Sources - try status first, then MIND stats
   const sources = status?.sources_ingested || MIND?.stats?.sources_scanned_24h || MIND?.sources?.length || 0;
   set('status-sources', sources > 0 ? sources : '--');
 
-  // Agents - from new agents_available field or fallback to active_models
-  const agents = status?.agents_available || status?.active_models?.length || (MIND?.stats?.models_participated || 1);
+  // Agents - from agents_available field
+  const agents = status?.agents_available || '--';
   set('status-models', agents);
 
   // Forecasts and last update from MIND

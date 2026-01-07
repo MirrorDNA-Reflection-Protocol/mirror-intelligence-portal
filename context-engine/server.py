@@ -19,13 +19,15 @@ from collections import deque
 
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from data_schema import PortalData, Meta, LivingMind, LiveEvent
 from ingest import IngestEngine, IngestEvent
 from council import CouncilEngine, CouncilEvent
 from deliberation import DeliberationEngine, DeliberationSession
 from agents import get_agent_status, get_available_agents, AgentRole
+from phase_manager import get_phase_manager, Phase
 
 # ═══════════════════════════════════════════════════════════════
 # CONFIGURATION
@@ -34,17 +36,25 @@ from agents import get_agent_status, get_available_agents, AgentRole
 DATA_PATH = Path(__file__).parent.parent / "public" / "data.json"
 ARTIFACTS_DIR = Path(__file__).parent / "artifacts"
 SESSIONS_DIR = Path(__file__).parent / "sessions"
+STATIC_DIR = Path(__file__).parent.parent  # Root of project for index.html, main.js, index.css
 
 # Global state
 EVENT_QUEUE = asyncio.Queue()
 ACTIVITY_LOG = deque(maxlen=100)  # Last 100 events
+
+# Legacy ENGINE_STATE kept for compatibility, but phase is now gated
 ENGINE_STATE = {
-    "phase": "idle",
+    "phase": "idle",  # Read from PhaseManager
     "last_activity": None,
     "active_models": [],
     "sessions_today": 0,
     "sources_ingested": 0
 }
+
+def sync_phase_from_manager():
+    """Sync ENGINE_STATE phase from PhaseManager (single source of truth)."""
+    pm = get_phase_manager()
+    ENGINE_STATE["phase"] = pm.state.phase.value
 
 # ═══════════════════════════════════════════════════════════════
 # LIFESPAN
@@ -258,8 +268,57 @@ async def run_full_pipeline() -> PortalData:
 # API ENDPOINTS
 # ═══════════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════════
+# STATIC FILE SERVING (for production via Cloudflare tunnel)
+# ═══════════════════════════════════════════════════════════════
+
 @app.get("/")
-def root():
+async def serve_index():
+    """Serve the main HTML page."""
+    index_path = STATIC_DIR / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path, media_type="text/html")
+    # Fallback to API info if no index.html
+    return {
+        "name": "Mirror Intelligence — Truth Engine",
+        "version": "4.0",
+        "status": ENGINE_STATE["phase"],
+        "note": "No index.html found. Run frontend build or use Vite dev server."
+    }
+
+@app.get("/main.js")
+async def serve_main_js():
+    """Serve the main JavaScript file."""
+    js_path = STATIC_DIR / "main.js"
+    if js_path.exists():
+        return FileResponse(js_path, media_type="application/javascript")
+    raise HTTPException(404, "main.js not found")
+
+@app.get("/index.css")
+async def serve_index_css():
+    """Serve the main CSS file."""
+    css_path = STATIC_DIR / "index.css"
+    if css_path.exists():
+        return FileResponse(css_path, media_type="text/css")
+    raise HTTPException(404, "index.css not found")
+
+@app.get("/style.css")
+async def serve_style_css():
+    """Serve additional CSS file."""
+    css_path = STATIC_DIR / "style.css"
+    if css_path.exists():
+        return FileResponse(css_path, media_type="text/css")
+    raise HTTPException(404, "style.css not found")
+
+# Mount public directory for data.json and other static assets
+app.mount("/public", StaticFiles(directory=str(STATIC_DIR / "public")), name="public")
+
+# ═══════════════════════════════════════════════════════════════
+# API INFO (moved from /)
+# ═══════════════════════════════════════════════════════════════
+
+@app.get("/api")
+def api_info():
     return {
         "name": "Mirror Intelligence — Truth Engine",
         "version": "4.0",
@@ -280,9 +339,20 @@ def root():
 
 @app.get("/api/status")
 def get_status():
-    """Real-time engine status."""
+    """Real-time engine status — authoritative state from PhaseManager."""
+    pm = get_phase_manager()
+    state = pm.get_state()  # Single source of truth
+    
     return {
-        "phase": ENGINE_STATE["phase"],
+        # Authoritative phase state
+        "phase": state["phase"],
+        "phase_since": state["since"],
+        "session_id": state["session_id"],
+        "requirements": state["requirements"],
+        "blocked_reason": state["blocked_reason"],
+        "last_event": state["last_event"],
+        
+        # Legacy fields for compatibility
         "last_activity": ENGINE_STATE["last_activity"],
         "active_models": ENGINE_STATE["active_models"],
         "agents": get_agent_status(),
