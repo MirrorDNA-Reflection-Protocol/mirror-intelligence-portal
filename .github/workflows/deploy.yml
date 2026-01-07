@@ -28,6 +28,8 @@ jobs:
       - run: |
           cp public/logo.png dist/
           cp public/favicon.svg dist/
+          cp public/data.json dist/
+          cp public/social_artifacts.json dist/ 2>/dev/null || true
           echo "brief.activemirror.ai" > dist/CNAME
       - uses: actions/upload-pages-artifact@v3
         with:
