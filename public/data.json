@@ -1,76 +1,103 @@
 {
     "meta": {
-        "date": "Tuesday, January 7, 2026",
-        "generated": "2026-01-07T05:45:00Z"
+        "date": "Wednesday, January 07, 2026",
+        "generated": "2026-01-07T05:49:50.988406Z"
     },
     "briefing": {
-        "headline": "The Industry Pivots from Spectacle to Substance",
-        "subline": "CES 2026 is quiet. That is the point.",
-        "summary": "The era of 'AI Magic' marketing is over. As compute costs stabilize and consumer fatigue sets in, the major players (Apple, Google, OpenAI) are shifting focus to 'invisible intelligence'—deep integration, battery efficiency, and institutional reliability. The noise has collapsed; the signal is operational depth.",
+        "headline": "Daily Intelligence Brief",
+        "subline": "Today's synthesis",
+        "summary": "Council synthesis in progress.",
         "stats": {
-            "sources": 14,
+            "sources": 5,
             "models": 4
         },
         "sections": {
             "changed": [
                 {
-                    "text": "OpenAI announces 'Sovereign-Lite' tiers for enterprise (local weights).",
-                    "detail": "A direct response to Llama 4's dominance in on-prem markets.",
+                    "text": "OpenAI Launches GPT Image 1.5",
+                    "detail": "OpenAI\u2019s new image generator enables detailed conversational image editing.",
                     "source": {
-                        "name": "The Information",
-                        "n": 1
+                        "n": 1,
+                        "name": "Ars Technica",
+                        "url": null,
+                        "tier": 1
                     },
                     "voice": "gpt",
-                    "severity": "low"
+                    "severity": null,
+                    "priority": null
                 },
                 {
-                    "text": "NVIDIA Blackwell yield issues resolved; stock up 4% pre-market.",
-                    "detail": "Supply chain normalization faster than consensus.",
+                    "text": "Qwen Model Runs on Raspberry Pi",
+                    "detail": "A 30B Qwen model operates in real-time on a Raspberry Pi.",
                     "source": {
-                        "name": "Bloomberg",
-                        "n": 2
+                        "n": 2,
+                        "name": "Hacker News",
+                        "url": null,
+                        "tier": 1
                     },
-                    "voice": "deepseek",
-                    "severity": "low"
+                    "voice": "gpt",
+                    "severity": null,
+                    "priority": null
                 },
                 {
-                    "text": "EU AI Act 'Phase 2' enforcement begins today.",
-                    "detail": "General purpose models now require watermark compliance.",
+                    "text": "Browser Extensions Harvest AI Conversations",
+                    "detail": "Chromium extensions collect extended AI conversation data over months.",
                     "source": {
-                        "name": "Financial Times",
-                        "n": 3
+                        "n": 3,
+                        "name": "Ars Technica",
+                        "url": null,
+                        "tier": 1
                     },
-                    "voice": "mistral",
-                    "severity": "risk"
-                }
-            ],
-            "matters": [
-                {
-                    "text": "The pivot to 'Local Weights' validates the MirrorDNA thesis.",
-                    "voice": "gpt"
+                    "voice": "gpt",
+                    "severity": null,
+                    "priority": null
                 },
                 {
-                    "text": "Regulatory drag in EU is widening the 'Compute Gap' with US/China.",
-                    "voice": "mistral"
-                }
-            ],
-            "risks": [
+                    "text": "Cond\u00e9 Nast Data Breach Exposes User Database",
+                    "detail": "A major breach compromised Cond\u00e9 Nast\u2019s user data, though Ars users remain unaffected.",
+                    "source": {
+                        "n": 4,
+                        "name": "Ars Technica",
+                        "url": null,
+                        "tier": 1
+                    },
+                    "voice": "gpt",
+                    "severity": null,
+                    "priority": null
+                },
                 {
-                    "text": "Deepfake volume up 400% in Q4; verifying identity is now a critical path.",
-                    "severity": "high",
-                    "voice": "mistral"
+                    "text": "Microsoft Disables Snapdragon Dev Kit",
+                    "detail": "Microsoft\u2019s actions disrupted a developer\u2019s Snapdragon Dev Kit, raising concerns about hardware support policies.",
+                    "source": {
+                        "n": 5,
+                        "name": "Hacker News",
+                        "url": null,
+                        "tier": 1
+                    },
+                    "voice": "gpt",
+                    "severity": null,
+                    "priority": null
                 }
             ],
-            "actions": [
-                {
-                    "text": "Monitor: OpenAI 'Sovereign' pricing vs. Llama 4 inference costs.",
-                    "priority": "high"
-                }
-            ],
+            "matters": [],
+            "risks": [],
+            "actions": [],
             "ignore": [
                 {
-                    "text": "Samsung's 'AI Fridge' announcements (CES vaporware).",
-                    "voice": "groq"
+                    "text": "OpenAI\u2019s GPT Image 1.5 hype",
+                    "detail": null,
+                    "source": null,
+                    "voice": "groq",
+                    "severity": null,
+                    "priority": null
+                },
+                {
+                    "text": "Browser extensions harvesting AI conversations",
+                    "detail": null,
+                    "source": null,
+                    "voice": "groq",
+                    "severity": null,
+                    "priority": null
                 }
             ]
         }
