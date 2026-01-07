@@ -199,18 +199,39 @@ Extract 5-8 claims and 3-5 signals.
         await self._emit("skeptic", "Finding counterarguments...")
         skeptic_prompt = f"""
 You are a professional skeptic. Your job is to find what could be wrong.
-For EVERY apparent consensus or trend, you MUST provide a counterargument.
+For EVERY apparent consensus or trend, you MUST provide numbered counterarguments.
 
 INPUTS:
 {context[:8000]}
 
-Output format:
-COUNTER: [The counterargument] | TARGET: [What claim/trend this challenges] | STRENGTH: [weak/moderate/strong]
-RISK: [Systemic risk if consensus is wrong] | SEVERITY: [low/medium/high/critical]
+=== REQUIRED OUTPUT FORMAT ===
 
-You MUST output at least 3 counterarguments and 2 risks. Silence is not allowed.
+COUNTERARGUMENTS (3-7 numbered):
+1. [First counter] | TARGET: [What this challenges] | STRENGTH: [weak/moderate/strong]
+2. [Second counter] | TARGET: [What this challenges] | STRENGTH: [weak/moderate/strong]
+3. [Third counter] | TARGET: [What this challenges] | STRENGTH: [weak/moderate/strong]
+... (continue to 7 max)
+
+FALSIFIABILITY_TEST: [One specific test that could prove the consensus WRONG. Must be concrete and measurable.]
+
+EVIDENCE_THAT_WOULD_CHANGE_MY_MIND: [What evidence, if produced, would make you abandon your skepticism?]
+
+RISKS (2-4):
+RISK: [Systemic risk if consensus is wrong] | SEVERITY: [low/medium/high/critical] | COMPOUND: [What makes this worse over time]
+
+CONFIDENCE_PENALTY: [0-20] - How many percentage points should be deducted from any forecast confidence due to unaddressed risks?
+
+UNRESOLVED_QUESTIONS (1-3):
+1. [Question that remains unanswered]
+2. [Another question]
+
+=== RULES ===
+- You MUST output at least 3 numbered counterarguments
+- You MUST provide FALSIFIABILITY_TEST
+- You MUST provide EVIDENCE_THAT_WOULD_CHANGE_MY_MIND
+- Silence is NEVER allowed. If you cannot find counters, state why explicitly.
 """
-        skeptic_sys = f"You are {COUNCIL['skeptic']['name']}. {COUNCIL['skeptic']['bias']}"
+        skeptic_sys = f"You are {COUNCIL['skeptic']['name']}. {COUNCIL['skeptic']['bias']} You are FORCED to dissent. Consensus without challenge is dangerous."
         skeptic_output = await self._query("skeptic", skeptic_prompt, skeptic_sys)
         skeptic_output.parsed = self._parse_skeptic(skeptic_output.raw_response)
         self.current_run.agent_outputs["skeptic"] = skeptic_output
@@ -453,11 +474,42 @@ Generate 3-5 forecasts with varying time horizons (30 days to 12 months).
         
         return {"claims": claims, "signals": signals}
 
-    def _parse_skeptic(self, raw: str) -> Dict[str, List]:
+    def _parse_skeptic(self, raw: str) -> Dict[str, Any]:
+        """Parse enhanced skeptic output with numbered counters and additional fields."""
+        import re
+        
         counters = []
         risks = []
+        falsifiability_test = None
+        evidence_to_change_mind = None
+        confidence_penalty = 0
+        unresolved_questions = []
+        
         for line in raw.split("\n"):
-            if "COUNTER:" in line:
+            line = line.strip()
+            if not line:
+                continue
+            
+            # Parse numbered counters (1. [counter] | TARGET: ... | STRENGTH: ...)
+            numbered_match = re.match(r'^(\d+)\.\s*(.+)', line)
+            if numbered_match and "TARGET:" in line:
+                parts = line.split("|")
+                text = parts[0]
+                # Remove the number prefix
+                text = re.sub(r'^\d+\.\s*', '', text).strip()
+                target = "General consensus"
+                strength = "moderate"
+                for p in parts:
+                    p_lower = p.lower()
+                    if "target:" in p_lower:
+                        target = p.split(":", 1)[1].strip() if ":" in p else target
+                    if "strength:" in p_lower:
+                        strength = p.split(":", 1)[1].strip().lower() if ":" in p else strength
+                if text and len(text) > 5:
+                    counters.append({"text": text[:500], "target": target, "strength": strength})
+            
+            # Legacy COUNTER: format
+            elif "COUNTER:" in line:
                 parts = line.split("|")
                 text = parts[0].replace("COUNTER:", "").strip()
                 target = "General consensus"
@@ -465,15 +517,54 @@ Generate 3-5 forecasts with varying time horizons (30 days to 12 months).
                 for p in parts:
                     if "TARGET:" in p: target = p.replace("TARGET:", "").strip()
                     if "STRENGTH:" in p: strength = p.replace("STRENGTH:", "").strip().lower()
-                counters.append({"text": text, "target": target, "strength": strength})
+                if text:
+                    counters.append({"text": text[:500], "target": target, "strength": strength})
+            
+            # Parse RISK lines
             elif "RISK:" in line:
                 parts = line.split("|")
                 text = parts[0].replace("RISK:", "").strip()
                 sev = "medium"
+                compound = "Unknown"
                 for p in parts:
                     if "SEVERITY:" in p: sev = p.replace("SEVERITY:", "").strip().lower()
-                risks.append({"text": text, "severity": sev, "compound": "See analysis"})
-        return {"counters": counters, "risks": risks}
+                    if "COMPOUND:" in p: compound = p.replace("COMPOUND:", "").strip()
+                if text:
+                    risks.append({"text": text[:500], "severity": sev, "compound": compound})
+            
+            # Parse FALSIFIABILITY_TEST
+            elif "FALSIFIABILITY_TEST:" in line:
+                falsifiability_test = line.split(":", 1)[1].strip() if ":" in line else None
+            
+            # Parse EVIDENCE_THAT_WOULD_CHANGE_MY_MIND
+            elif "EVIDENCE_THAT_WOULD_CHANGE_MY_MIND:" in line:
+                evidence_to_change_mind = line.split(":", 1)[1].strip() if ":" in line else None
+            
+            # Parse CONFIDENCE_PENALTY
+            elif "CONFIDENCE_PENALTY:" in line:
+                try:
+                    penalty_str = line.split(":", 1)[1].strip()
+                    # Extract just the number
+                    penalty_match = re.search(r'(\d+)', penalty_str)
+                    if penalty_match:
+                        confidence_penalty = min(int(penalty_match.group(1)), 20)
+                except:
+                    pass
+            
+            # Parse unresolved questions (numbered after UNRESOLVED_QUESTIONS header)
+            elif line.startswith(("1.", "2.", "3.")) and "UNRESOLVED" not in line and "TARGET" not in line:
+                question = re.sub(r'^\d+\.\s*', '', line).strip()
+                if question and len(question) > 10 and "?" in question:
+                    unresolved_questions.append(question)
+        
+        return {
+            "counters": counters,
+            "risks": risks,
+            "falsifiability_test": falsifiability_test,
+            "evidence_to_change_mind": evidence_to_change_mind,
+            "confidence_penalty": confidence_penalty,
+            "unresolved_questions": unresolved_questions[:3]  # Max 3
+        }
 
     def _parse_analyst(self, raw: str) -> Dict[str, List]:
         effects = []

@@ -118,29 +118,36 @@ function connectLiveStream() {
 }
 
 function handleLiveEvent(event) {
-  // Update phase
+  // Update phase from authoritative source
   if (event.phase) {
     ENGINE_PHASE = event.phase;
     updatePhaseDisplay(event.phase);
   }
 
-  // Add to activity log
-  if (event.type !== 'heartbeat') {
-    ACTIVITY_LOG.unshift(event);
+  // Add to activity log (real events only, not heartbeats)
+  if (event.type !== 'heartbeat' && event.type !== 'connected') {
+    ACTIVITY_LOG.unshift({
+      ...event,
+      receivedAt: new Date().toISOString()
+    });
     if (ACTIVITY_LOG.length > 50) ACTIVITY_LOG.pop();
     updateActivityFeed(event);
+    updateLiveActivityTicker(event);
   }
 
   // Specific event handling
   switch (event.type) {
     case 'phase_change':
       showPhaseTransition(event.phase, event.message);
+      loadStatus(); // Refresh authoritative state
       break;
     case 'model_thinking':
-      showModelActivity(event.model, event.model_name, 'thinking');
+    case 'agent_thinking':
+      showModelActivity(event.model || event.agent, event.model_name || event.agent_name, 'thinking');
       break;
     case 'model_take':
-      showModelActivity(event.model, event.model_name, 'complete', event.take);
+    case 'agent_complete':
+      showModelActivity(event.model || event.agent, event.model_name || event.agent_name, 'complete', event.take);
       break;
     case 'model_response':
       showModelDebate(event.model, event.responding_to, event.agreement);
@@ -149,8 +156,69 @@ function handleLiveEvent(event) {
       showSynthesis(event);
       break;
     case 'pipeline_complete':
-      loadMind();
+    case 'council_complete':
+      loadMind(); // Refresh all data including deltas
+      loadStatus();
       break;
+    case 'ingest_complete':
+      updateIngestStatus(event);
+      break;
+  }
+}
+
+function updateLiveActivityTicker(event) {
+  // Update the live activity display with real events
+  const ticker = document.getElementById('live-activity-ticker');
+  if (!ticker) return;
+
+  const eventText = formatEventForTicker(event);
+  if (!eventText) return;
+
+  const entry = document.createElement('div');
+  entry.className = 'ticker-event';
+  entry.innerHTML = `
+    <span class="ticker-time">${formatTime(event.timestamp || new Date().toISOString())}</span>
+    <span class="ticker-text">${eventText}</span>
+  `;
+
+  ticker.insertBefore(entry, ticker.firstChild);
+
+  // Keep only last 10 events
+  while (ticker.children.length > 10) {
+    ticker.removeChild(ticker.lastChild);
+  }
+}
+
+function formatEventForTicker(event) {
+  switch (event.type) {
+    case 'ingest_complete':
+      return `Ingested ${event.count || 'N'} sources`;
+    case 'agent_thinking':
+    case 'model_thinking':
+      return `${event.agent_name || event.model_name || 'Agent'} analyzing...`;
+    case 'agent_complete':
+    case 'model_take':
+      return `${event.agent_name || event.model_name || 'Agent'} completed`;
+    case 'phase_change':
+      return `Phase: ${event.phase}`;
+    case 'synthesis_complete':
+      return 'Synthesis complete';
+    case 'pipeline_complete':
+    case 'council_complete':
+      return 'Pipeline finished';
+    case 'dissent_recorded':
+      return `Dissent: ${event.message || 'counter recorded'}`;
+    case 'forecast_updated':
+      return `Forecast updated: ${event.forecast_id || ''}`;
+    default:
+      return event.message || null;
+  }
+}
+
+function updateIngestStatus(event) {
+  const sourcesEl = document.getElementById('status-sources');
+  if (sourcesEl && event.count) {
+    sourcesEl.textContent = event.count;
   }
 }
 

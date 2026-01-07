@@ -134,9 +134,17 @@ async def deliberation_adapter(event: dict):
 # ═══════════════════════════════════════════════════════════════
 
 async def run_full_pipeline() -> PortalData:
-    """Run complete: Ingest → Deliberate → Synthesize → Store"""
+    """Run complete: Ingest → Deliberate → Synthesize → Store
     
-    ENGINE_STATE["phase"] = "ingesting"
+    Phase transitions are GATED by PhaseManager.
+    """
+    pm = get_phase_manager()
+    session_id = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    pm.start_session(session_id)
+    
+    # Try to advance to ingesting (always allowed from idle)
+    pm.try_advance_to(Phase.INGESTING)
+    sync_phase_from_manager()
     await emit_live_event("phase_change", "Starting ingestion...", phase="ingesting")
     
     # 1. INGEST
@@ -149,10 +157,30 @@ async def run_full_pipeline() -> PortalData:
     
     await emit_live_event("ingest_complete", f"Ingested {len(sources)} sources", count=len(sources))
     
-    # 2. DELIBERATE (Multi-model)
-    ENGINE_STATE["phase"] = "deliberating"
-    await emit_live_event("phase_change", "Starting multi-model deliberation...", phase="deliberating")
+    # 2. DELIBERATE (Multi-model via Council)
+    # Record agent executions for phase gate
+    council = CouncilEngine(event_callback=council_adapter)
     
+    # Define callback to record agent executions
+    original_emit = council._emit
+    async def gated_emit(agent, message):
+        await original_emit(agent, message)
+        # Record agent execution when complete
+        if "complete" in message.lower() or "finished" in message.lower():
+            pm.record_agent_execution(agent, agent.title(), "ollama", message)
+    council._emit = gated_emit
+    
+    # Run council
+    mind = await council.run(sources, context)
+    
+    # Try to advance to deliberating (requires ≥2 agents)
+    if pm.try_advance_to(Phase.DELIBERATING):
+        sync_phase_from_manager()
+        await emit_live_event("phase_change", "Deliberation in progress...", phase="deliberating")
+    else:
+        await emit_live_event("phase_blocked", f"Deliberation blocked: {pm.state.blocked_reason}")
+    
+    # Also run the multi-model deliberation engine
     delib_engine = DeliberationEngine(event_callback=deliberation_adapter)
     session = await delib_engine.deliberate(
         topic=f"Daily Intelligence - {datetime.now().strftime('%Y-%m-%d')}",
