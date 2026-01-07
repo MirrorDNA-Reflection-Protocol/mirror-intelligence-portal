@@ -229,11 +229,22 @@ async def run_full_pipeline() -> PortalData:
     
     ENGINE_STATE["sessions_today"] += 1
     
-    # 3. BUILD MIND (using council for beliefs/risks/forecasts)
-    ENGINE_STATE["phase"] = "synthesizing"
-    await emit_live_event("phase_change", "Building mental model...", phase="synthesizing")
+    # Record arbiter output (synthesis is the arbiter's work)
+    if session.synthesis:
+        arbiter_output = json.dumps({
+            "consensus": session.synthesis.consensus,
+            "disagreements": session.synthesis.disagreements,
+            "final_probability": session.synthesis.final_probability
+        })
+        pm.record_arbiter_output(arbiter_output)
     
-    council = CouncilEngine(event_callback=council_adapter)
+    # 3. BUILD MIND (using council for beliefs/risks/forecasts)
+    # Try to advance to synthesizing (requires arbiter output)
+    if pm.try_advance_to(Phase.SYNTHESIZING):
+        sync_phase_from_manager()
+        await emit_live_event("phase_change", "Building mental model...", phase="synthesizing")
+    else:
+        await emit_live_event("phase_blocked", f"Synthesis blocked: {pm.state.blocked_reason}")
     
     prev_mind = None
     if DATA_PATH.exists():
@@ -242,6 +253,10 @@ async def run_full_pipeline() -> PortalData:
             prev_mind = prev_data.mind
         except:
             pass
+    
+    # Re-use council from earlier or create new one
+    if not hasattr(council, 'generate_mind'):
+        council = CouncilEngine(event_callback=council_adapter)
     
     mind = await council.generate_mind(
         context,
@@ -273,8 +288,14 @@ async def run_full_pipeline() -> PortalData:
     mind.stats["models_participated"] = len(session.initial_takes)
     
     # 4. SAVE
-    ENGINE_STATE["phase"] = "complete"
-    await emit_live_event("phase_change", "Pipeline complete", phase="complete")
+    # Record ledger commit for published gate
+    ledger_entry_id = f"ledger_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    pm.record_ledger_commit(ledger_entry_id)
+    
+    # Try to advance to published (requires ledger commit)
+    if pm.try_advance_to(Phase.PUBLISHED):
+        sync_phase_from_manager()
+        await emit_live_event("phase_change", "Pipeline complete", phase="published")
     
     data = PortalData(
         meta=Meta(date=datetime.now().strftime("%A, %B %d, %Y"), version="4.0-truth-engine"),
@@ -288,7 +309,8 @@ async def run_full_pipeline() -> PortalData:
     
     # Reset to idle after short delay
     await asyncio.sleep(2)
-    ENGINE_STATE["phase"] = "idle"
+    pm.try_advance_to(Phase.IDLE)
+    sync_phase_from_manager()
     
     return data
 

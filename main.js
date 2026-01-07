@@ -328,6 +328,9 @@ function renderActivityPanel() {
         <span class="panel-title">⟡ LIVE ACTIVITY</span>
         <span class="panel-subtitle" id="activity-count">0 events</span>
       </div>
+      <div class="live-activity-ticker" id="live-activity-ticker">
+        <div class="ticker-idle" id="ticker-idle">No events yet • Waiting for activity</div>
+      </div>
       <div class="activity-feed" id="activity-feed">
         <div class="activity-empty">Waiting for activity...</div>
       </div>
