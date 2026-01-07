@@ -300,8 +300,13 @@ function render() {
   const content = document.getElementById('content-area');
   if (!content) return;
 
-  // 3-PLANE ARCHITECTURE
+  // APPROACHABLE 3-PLANE ARCHITECTURE
   content.innerHTML = `
+    <!-- GUIDED INTERACTION LAYER -->
+    ${renderAskEngine()}
+    ${renderExampleQuestions()}
+    ${renderChangesSummary()}
+    
     <!-- PLANE 2: COGNITIVE SPINE -->
     <div class="cognitive-spine">
       ${renderActivityStream()}
@@ -321,6 +326,81 @@ function render() {
   `;
 
   attachEventListeners();
+}
+
+function renderAskEngine() {
+  return `
+    <div class="ask-engine">
+      <div class="ask-engine-title">What would you like to know?</div>
+      <div class="ask-engine-subtitle">The Truth Engine synthesizes intelligence from ${MIND?.sources?.length || 200}+ sources daily</div>
+      <button class="ask-engine-btn" onclick="triggerDeliberation()">
+        ⟡ Request Analysis
+      </button>
+    </div>
+  `;
+}
+
+function renderExampleQuestions() {
+  const examples = [
+    "What cyber risks are rising fastest right now?",
+    "Which forecasts changed confidence this week?",
+    "What would most likely break our current assumptions?"
+  ];
+
+  return `
+    <div class="example-questions">
+      <div class="examples-header">Try asking</div>
+      <div class="examples-list">
+        ${examples.map(q => `
+          <div class="example-item" onclick="showExampleResponse('${q}')">
+            <span class="example-bullet">→</span>
+            <span>${q}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderChangesSummary() {
+  const forecasts = MIND?.forecasts || [];
+  const beliefs = MIND?.beliefs || [];
+  const risks = MIND?.risks || [];
+  const lastUpdate = MIND?.stats?.last_updated;
+
+  // Simulate changes (in production, compare with stored state)
+  const forecastsAdded = forecasts.filter(f => f.status === 'open').length;
+  const risksCount = risks.length;
+
+  return `
+    <div class="changes-summary">
+      <div class="changes-header">Since your last visit</div>
+      <div class="changes-list">
+        <div class="change-item">
+          <span class="change-delta positive">+${forecastsAdded}</span>
+          <span>active forecasts</span>
+        </div>
+        <div class="change-item">
+          <span class="change-delta neutral">${beliefs.length}</span>
+          <span>beliefs tracked</span>
+        </div>
+        <div class="change-item">
+          <span class="change-delta ${risksCount > 3 ? 'negative' : 'neutral'}">${risksCount}</span>
+          <span>risks surfaced</span>
+        </div>
+        <div class="change-item">
+          <span class="change-delta neutral">${formatTimeAgo(lastUpdate)}</span>
+          <span>last deliberation</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showExampleResponse(question) {
+  // For now, trigger deliberation
+  console.log('Example question:', question);
+  triggerDeliberation();
 }
 
 function renderLiveBar() {
