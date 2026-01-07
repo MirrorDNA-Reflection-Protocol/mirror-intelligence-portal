@@ -360,6 +360,14 @@ async def serve_style_css():
         return FileResponse(css_path, media_type="text/css")
     raise HTTPException(404, "style.css not found")
 
+@app.get("/terminal.css")
+async def serve_terminal_css():
+    """Serve the terminal visual language CSS."""
+    css_path = STATIC_DIR / "terminal.css"
+    if css_path.exists():
+        return FileResponse(css_path, media_type="text/css")
+    raise HTTPException(404, "terminal.css not found")
+
 # Mount public directory for data.json and other static assets
 app.mount("/public", StaticFiles(directory=str(STATIC_DIR / "public")), name="public")
 
