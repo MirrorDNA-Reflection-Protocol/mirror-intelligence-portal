@@ -104,11 +104,14 @@ function render() {
 }
 
 function renderRealityDelta(deltas) {
-  if (!deltas || deltas.length === 0) return '';
+  const safeDeltas = (deltas && deltas.length > 0) ? deltas : [
+    { text: "System calibration in progress...", sentiment: "neutral", magnitude: null },
+    { text: "Waiting for Reality Signal...", sentiment: "neutral", magnitude: null }
+  ];
 
-  const items = deltas.map(d => `
+  const items = safeDeltas.map(d => `
     <span class="delta-item ${d.sentiment}">
-      <span class="delta-icon">${d.magnitude > 0 ? '▲' : '▼'}</span>
+      <span class="delta-icon">${d.magnitude > 0 ? '▲' : (d.magnitude < 0 ? '▼' : '⟡')}</span>
       <span class="delta-text">${d.text}</span>
       ${d.magnitude ? `<span class="delta-mag">${d.magnitude > 0 ? '+' : ''}${d.magnitude}%</span>` : ''}
     </span>
