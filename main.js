@@ -12,6 +12,27 @@ let MIND = null;
 let EVENT_SOURCE = null;
 let ENGINE_PHASE = 'idle';
 let ACTIVITY_LOG = [];
+let COMMAND_PALETTE_OPEN = false;
+
+// User Memory (localStorage)
+const USER_MEMORY_KEY = 'mirror_intelligence_user';
+function getUserMemory() {
+  try {
+    return JSON.parse(localStorage.getItem(USER_MEMORY_KEY)) || {
+      lastVisit: null,
+      viewedForecasts: [],
+      questionsAsked: []
+    };
+  } catch { return { lastVisit: null, viewedForecasts: [], questionsAsked: [] }; }
+}
+function saveUserMemory(mem) {
+  try { localStorage.setItem(USER_MEMORY_KEY, JSON.stringify(mem)); } catch { }
+}
+function recordVisit() {
+  const mem = getUserMemory();
+  mem.lastVisit = new Date().toISOString();
+  saveUserMemory(mem);
+}
 
 // ═══════════════════════════════════════════════════════════════
 // INITIALIZATION
@@ -21,9 +42,42 @@ async function init() {
   console.log("⟡ Truth Engine v4 initializing...");
   renderShell();
   await loadMind();
-  loadStatus(); // Load status immediately after mind loads
+  loadStatus();
   connectLiveStream();
   startPulseAnimation();
+  initCommandPalette();
+  recordVisit();
+}
+
+function initCommandPalette() {
+  document.addEventListener('keydown', (e) => {
+    // ⌘K or / to open
+    if ((e.metaKey && e.key === 'k') || (e.key === '/' && !e.target.matches('input, textarea'))) {
+      e.preventDefault();
+      toggleCommandPalette();
+    }
+    // Escape to close
+    if (e.key === 'Escape' && COMMAND_PALETTE_OPEN) {
+      closeCommandPalette();
+    }
+  });
+}
+
+function toggleCommandPalette() {
+  COMMAND_PALETTE_OPEN = !COMMAND_PALETTE_OPEN;
+  const overlay = document.getElementById('command-palette-overlay');
+  if (overlay) {
+    overlay.classList.toggle('open', COMMAND_PALETTE_OPEN);
+    if (COMMAND_PALETTE_OPEN) {
+      setTimeout(() => overlay.querySelector('.command-input')?.focus(), 50);
+    }
+  }
+}
+
+function closeCommandPalette() {
+  COMMAND_PALETTE_OPEN = false;
+  const overlay = document.getElementById('command-palette-overlay');
+  if (overlay) overlay.classList.remove('open');
 }
 
 function renderShell() {
@@ -300,22 +354,35 @@ function render() {
   const content = document.getElementById('content-area');
   if (!content) return;
 
-  // APPROACHABLE 3-PLANE ARCHITECTURE
+  // SPATIAL HUB ARCHITECTURE
   content.innerHTML = `
-    <!-- GUIDED INTERACTION LAYER -->
-    ${renderAskEngine()}
-    ${renderExampleQuestions()}
-    ${renderChangesSummary()}
+    <!-- COMMAND PALETTE (Hidden until ⌘K) -->
+    ${renderCommandPalette()}
     
-    <!-- PLANE 2: COGNITIVE SPINE -->
-    <div class="cognitive-spine">
-      ${renderActivityStream()}
-      ${renderStatusReadings()}
-      ${renderExecutiveModel()}
-      ${renderDeltas()}
+    <!-- HUB GRID: 3 COLUMNS -->
+    <div class="hub-container">
+      
+      <!-- LEFT RAIL: Inputs & Commands -->
+      <div class="left-rail">
+        ${renderAskEngine()}
+        ${renderExampleQuestions()}
+        ${renderUserMemory()}
+      </div>
+      
+      <!-- CENTER: THINKING CORE (Sticky) -->
+      <div class="thinking-core" id="thinking-core">
+        ${renderThinkingCore()}
+      </div>
+      
+      <!-- RIGHT RAIL: Live State -->
+      <div class="right-rail">
+        ${renderLiveStateRail()}
+        ${renderDeltasRail()}
+      </div>
+      
     </div>
     
-    <!-- PLANE 3: COMMIT SURFACE -->
+    <!-- COMMIT SURFACE (Bottom) -->
     <div class="commit-surface">
       <div class="commit-header">⟡ CRYSTALLIZED TRUTH</div>
       ${renderForecasts()}
@@ -326,6 +393,198 @@ function render() {
   `;
 
   attachEventListeners();
+  updateThinkingCoreState();
+}
+
+function renderCommandPalette() {
+  const commands = [
+    { icon: '⟡', text: 'Request new analysis', hint: 'deliberate', action: 'triggerDeliberation()' },
+    { icon: '🔍', text: 'Search forecasts', hint: 'search', action: '' },
+    { icon: '📊', text: 'Show belief changes', hint: 'changes', action: '' },
+    { icon: '⚠️', text: 'View active risks', hint: 'risks', action: '' },
+    { icon: '📜', text: 'Open ledger', hint: 'ledger', action: '' },
+  ];
+
+  return `
+    <div class="command-palette-overlay" id="command-palette-overlay" onclick="if(event.target === this) closeCommandPalette()">
+      <div class="command-palette">
+        <div class="command-input-wrapper">
+          <span class="command-icon">⟡</span>
+          <input type="text" class="command-input" placeholder="What would you like to do?" autofocus>
+          <span class="command-shortcut">esc</span>
+        </div>
+        <div class="command-results">
+          ${commands.map((c, i) => `
+            <div class="command-item ${i === 0 ? 'selected' : ''}" onclick="${c.action}">
+              <span class="command-item-icon">${c.icon}</span>
+              <span class="command-item-text">${c.text}</span>
+              <span class="command-item-hint">${c.hint}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderThinkingCore() {
+  const update = MIND?.update || {};
+  const lastUpdate = MIND?.stats?.last_updated;
+  const signal = update.matters || 'Awaiting signal extraction...';
+  const confidence = update.confidence || 'No dissent recorded — confidence stable';
+  const unresolved = update.unresolved || null;
+
+  return `
+    <div class="core-header">
+      <span class="core-title">EXECUTIVE MODEL</span>
+      <div class="core-status">
+        <span class="core-status-dot ${ENGINE_PHASE === 'idle' ? 'idle' : ''}"></span>
+        <span>${ENGINE_PHASE === 'idle' ? 'WATCHING' : ENGINE_PHASE.toUpperCase()}</span>
+      </div>
+    </div>
+    
+    <div class="core-signal">${signal}</div>
+    
+    <div class="core-confidence">
+      <span class="core-confidence-label">CONFIDENCE</span>
+      <span class="core-confidence-value">${confidence}</span>
+    </div>
+    
+    ${unresolved ? `
+      <div class="core-unresolved">
+        <strong>UNRESOLVED:</strong> ${unresolved}
+      </div>
+    ` : ''}
+    
+    <div class="core-timestamp">Updated ${formatTimeAgo(lastUpdate)}</div>
+  `;
+}
+
+function updateThinkingCoreState() {
+  const core = document.getElementById('thinking-core');
+  if (!core) return;
+
+  // Remove old state classes
+  core.classList.remove('ingesting', 'deliberating', 'challenged');
+
+  // Add current state class
+  if (ENGINE_PHASE === 'ingesting') core.classList.add('ingesting');
+  if (ENGINE_PHASE === 'deliberating') core.classList.add('deliberating');
+  if (MIND?.update?.unresolved) core.classList.add('challenged');
+}
+
+function renderLiveStateRail() {
+  const events = ACTIVITY_LOG.slice(0, 5);
+  const isIdle = events.length === 0;
+
+  return `
+    <div class="rail-section">
+      <div class="rail-header">
+        <span class="rail-indicator ${isIdle ? 'idle' : ''}"></span>
+        <span>${isIdle ? 'WATCHING' : 'LIVE ACTIVITY'}</span>
+      </div>
+      <div class="activity-feed" id="activity-feed" style="font-size: 0.8rem;">
+        ${events.length > 0 ? events.map(e => `
+          <div class="activity-event" style="padding: 4px 0;">
+            <span class="event-time">${formatTime(e.timestamp || e.receivedAt)}</span>
+            <span class="event-text">${formatEventForTicker(e) || e.type}</span>
+          </div>
+        `).join('') : `
+          <div style="color: var(--text-ghost); font-size: 0.75rem;">
+            System idle — monitoring for signals
+          </div>
+        `}
+      </div>
+    </div>
+    
+    <div class="rail-section">
+      <div class="rail-header">STATUS</div>
+      ${renderStatusReadingsCompact()}
+    </div>
+  `;
+}
+
+function renderStatusReadingsCompact() {
+  const sources = MIND?.stats?.sources_scanned_24h || MIND?.sources?.length || 0;
+  const forecasts = MIND?.forecasts?.filter(f => f.status === 'open')?.length || 0;
+  const agents = MIND?.stats?.models_participated || 4;
+
+  return `
+    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--text-ghost);">Sources</span>
+        <span style="color: var(--text-primary); font-family: var(--font-mono);">${sources}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--text-ghost);">Agents</span>
+        <span style="color: var(--text-primary); font-family: var(--font-mono);">${agents}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: var(--text-ghost);">Forecasts</span>
+        <span style="color: var(--text-primary); font-family: var(--font-mono);">${forecasts}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderDeltasRail() {
+  const deltas = MIND?.deltas || [];
+
+  if (deltas.length === 0) {
+    return `
+      <div class="rail-section">
+        <div class="rail-header">REALITY SIGNALS</div>
+        <div style="color: var(--text-ghost); font-size: 0.75rem;">
+          No signals extracted yet
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="rail-section">
+      <div class="rail-header">REALITY SIGNALS</div>
+      ${deltas.slice(0, 3).map(d => `
+        <div style="display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--text-ghost); cursor: pointer;">
+          <span style="color: ${d.sentiment === 'positive' ? 'var(--signal-confidence)' : d.sentiment === 'negative' ? 'var(--signal-challenge)' : 'var(--text-muted)'}; font-family: var(--font-mono); font-weight: 600; min-width: 40px;">
+            ${d.magnitude > 0 ? '+' : ''}${d.magnitude || 0}%
+          </span>
+          <span style="font-size: 0.8rem; color: var(--text-body);">${d.text?.substring(0, 60)}...</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderUserMemory() {
+  const mem = getUserMemory();
+  const forecasts = MIND?.forecasts || [];
+  const beliefs = MIND?.beliefs || [];
+  const risks = MIND?.risks || [];
+
+  const timeSinceLastVisit = mem.lastVisit
+    ? formatTimeAgo(mem.lastVisit)
+    : 'First visit';
+
+  return `
+    <div class="user-memory">
+      <div class="memory-header">Since ${timeSinceLastVisit}</div>
+      <div class="memory-items">
+        <div class="memory-item">
+          <span class="memory-delta positive">+${forecasts.filter(f => f.status === 'open').length}</span>
+          <span>forecasts</span>
+        </div>
+        <div class="memory-item">
+          <span class="memory-delta neutral">${beliefs.length}</span>
+          <span>beliefs</span>
+        </div>
+        <div class="memory-item">
+          <span class="memory-delta ${risks.length > 3 ? 'negative' : 'neutral'}">${risks.length}</span>
+          <span>risks</span>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderAskEngine() {
