@@ -21,35 +21,43 @@ let PREDICTIONS = [];
 let DATA_LOADED = false;
 
 async function loadData() {
-  try {
-    const resp = await fetch('/data.json');
-    if (resp.ok) {
-      const data = await resp.json();
-      console.log('⟡ Loaded dynamic data:', data);
+  // Try Context Engine API first, then fall back to static file
+  const sources = [
+    'http://localhost:8083/api/briefing',  // Context Engine (local dev)
+    '/data.json'                            // Static fallback
+  ];
 
-      // Transform incoming single day briefing into the schedule format
-      // Note: In a real system, we'd fetch the full schedule.
-      // Here we map the dynamic brief to the CURRENT topic/day.
+  for (const url of sources) {
+    try {
+      const resp = await fetch(url, { timeout: 3000 });
+      if (resp.ok) {
+        const data = await resp.json();
+        console.log(`⟡ Loaded data from ${url}:`, data);
 
-      const day = new Date().getDay();
+        // Transform incoming single day briefing into the schedule format
+        const day = new Date().getDay();
 
-      BRIEFINGS[day] = {
-        date: data.meta.date,
-        sources: data.briefing.stats.sources,
-        models: data.briefing.stats.models,
-        headline: data.briefing.headline,
-        subline: data.briefing.subline,
-        summary: data.briefing.summary,
-        sections: data.briefing.sections
-      };
+        BRIEFINGS[day] = {
+          date: data.meta.date,
+          sources: data.briefing.stats.sources,
+          models: data.briefing.stats.models,
+          headline: data.briefing.headline,
+          subline: data.briefing.subline,
+          summary: data.briefing.summary,
+          sections: data.briefing.sections
+        };
 
-      PREDICTIONS = data.predictions;
-      DATA_LOADED = true;
-      render();
+        PREDICTIONS = data.predictions;
+        DATA_LOADED = true;
+        render();
+        return; // Success, exit loop
+      }
+    } catch (e) {
+      console.warn(`Failed to load from ${url}:`, e.message);
     }
-  } catch (e) {
-    console.error('Failed to load dynamic data, using static snapshot:', e);
   }
+
+  console.error('Failed to load dynamic data from all sources, using static snapshot');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1181,23 +1189,10 @@ function initLiveTerminal() {
   const terminal = document.getElementById('terminal-output');
   if (!terminal) return;
 
-  const logs = [
-    { agent: 'system', msg: 'Initializing Consortium Protocols...' },
-    { agent: 'system', msg: 'Loading context from MirrorDNA Vault...' },
-    { agent: 'gpt', msg: 'Scanning narrative layer: DETECTED shift in "OpenAI IPO" framing.' },
-    { agent: 'deepseek', msg: 'Ingesting financial report: 10-K from NVIDIA. Verifying CAPEX figures.' },
-    { agent: 'mistral', msg: 'Counter-point generated: The market is ignoring regulatory tail risks in EU.' },
-    { agent: 'groq', msg: 'Filtering noise: Samsung CES announcement marked "irrelevant".' },
-    { agent: 'system', msg: 'Synthesis complete. Formatting JSON...' },
-    { agent: 'gpt', msg: 'Analyzing Twitter sentiment for "DeepSeek"... negative spike detected.' },
-    { agent: 'deepseek', msg: 'Checking GitHub stars trend. Repo: deepseek-ai/DeepSeek-V3. Slope: +200/hour.' },
-    { agent: 'groq', msg: 'Latency check: 120ms. Ingesting new batch.' },
-    { agent: 'mistral', msg: 'Rebutting GPT consensus on "Apple Search". Evidence weak.' },
-    { agent: 'swarm', msg: 'Fracturing briefing for X (Twitter). Thread count: 6 tweets.' },
-    { agent: 'swarm', msg: 'Generating "Hook": "The industry is lying to you about Agentic AI..."' },
-    { agent: 'swarm', msg: 'Formatting LinkedIn strategic frame. Tone: "Thought Leader".' },
-    { agent: 'swarm', msg: 'Distribution complete. Social artifacts deposited.' }
-  ];
+  let tokenCount = 0;
+  let sourceCount = 0;
+  const startTime = Date.now();
+  let sseConnected = false;
 
   function addLine(log) {
     const line = document.createElement('div');
@@ -1206,17 +1201,18 @@ function initLiveTerminal() {
 
     const ts = new Date().toISOString().split('T')[1].split('.')[0];
 
+    let agent = log.agent || 'system';
     let color = '#888';
-    if (log.agent !== 'system' && COUNCIL[log.agent]) color = `var(--signal-${COUNCIL[log.agent].color})`;
+    if (agent !== 'system' && COUNCIL[agent]) color = `var(--signal-${COUNCIL[agent].color})`;
 
-    line.innerHTML = `<span style="color: #444;">[${ts}]</span> <span style="color: ${color}; font-weight: bold;">${log.agent.toUpperCase()}</span>: ${log.msg}`;
+    line.innerHTML = `<span style="color: #444;">[${ts}]</span> <span style="color: ${color}; font-weight: bold;">${agent.toUpperCase()}</span>: ${log.msg || log.message}`;
 
     terminal.appendChild(line);
     terminal.scrollTop = terminal.scrollHeight;
 
-    // Animate agent nav
-    if (log.agent !== 'system') {
-      const node = document.getElementById(`agent-${log.agent}`);
+    // Animate agent node
+    if (agent !== 'system' && COUNCIL[agent]) {
+      const node = document.getElementById(`agent-${agent}`);
       if (node) {
         node.style.borderColor = color;
         node.style.boxShadow = `0 0 10px ${color}33`;
@@ -1231,30 +1227,82 @@ function initLiveTerminal() {
         }, 800);
       }
     }
-  }
-
-  // Simulation Loop
-  let tokenCount = 0;
-  let sourceCount = 0;
-  const startTime = Date.now();
-
-  setInterval(() => {
-    const rand = logs[Math.floor(Math.random() * logs.length)];
-    addLine(rand);
 
     // Update stats
     tokenCount += Math.floor(Math.random() * 500) + 100;
-    sourceCount += Math.random() > 0.7 ? 1 : 0;
-    const latency = Math.floor(Math.random() * 80) + 40;
+    if (log.type === 'ingest') sourceCount++;
 
     const tokensEl = document.getElementById('stat-tokens');
-    const latencyEl = document.getElementById('stat-latency');
     const sourcesEl = document.getElementById('stat-sources');
-
     if (tokensEl) tokensEl.textContent = tokenCount.toLocaleString();
-    if (latencyEl) latencyEl.textContent = `${latency}ms`;
     if (sourcesEl) sourcesEl.textContent = sourceCount;
-  }, 1500);
+  }
+
+  // Try SSE connection to Context Engine
+  function connectSSE() {
+    try {
+      const evtSource = new EventSource('http://localhost:8083/api/live');
+
+      evtSource.onopen = () => {
+        sseConnected = true;
+        addLine({ agent: 'system', msg: '⟡ Connected to Context Engine (LIVE)' });
+        // Update status indicator
+        const statusEl = document.querySelector('.live-header span[style*="signal-green"]');
+        if (statusEl) statusEl.innerHTML = '● LIVE';
+      };
+
+      evtSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.message !== 'heartbeat') {
+            addLine({ agent: data.agent || 'system', msg: data.message, type: data.type });
+          }
+        } catch (e) {
+          console.warn('Failed to parse SSE event:', e);
+        }
+      };
+
+      evtSource.onerror = () => {
+        if (sseConnected) {
+          addLine({ agent: 'system', msg: '⚠ Context Engine disconnected. Falling back to simulation.' });
+        }
+        sseConnected = false;
+        evtSource.close();
+        // Start simulation fallback
+        startSimulation();
+      };
+
+    } catch (e) {
+      console.warn('SSE not available, using simulation:', e);
+      startSimulation();
+    }
+  }
+
+  // Fallback simulation
+  function startSimulation() {
+    const logs = [
+      { agent: 'system', msg: 'Initializing Consortium Protocols... (SIMULATED)' },
+      { agent: 'gpt', msg: 'Scanning narrative layer: DETECTED shift in "OpenAI IPO" framing.' },
+      { agent: 'deepseek', msg: 'Ingesting financial report: 10-K from NVIDIA. Verifying CAPEX figures.' },
+      { agent: 'mistral', msg: 'Counter-point generated: The market is ignoring regulatory tail risks in EU.' },
+      { agent: 'groq', msg: 'Filtering noise: Samsung CES announcement marked "irrelevant".' },
+      { agent: 'swarm', msg: 'Fracturing briefing for X (Twitter). Thread count: 6 tweets.' },
+    ];
+
+    setInterval(() => {
+      if (!sseConnected) {
+        const rand = logs[Math.floor(Math.random() * logs.length)];
+        addLine(rand);
+
+        const latency = Math.floor(Math.random() * 80) + 40;
+        const latencyEl = document.getElementById('stat-latency');
+        if (latencyEl) latencyEl.textContent = `${latency}ms`;
+      }
+    }, 1500);
+  }
+
+  // Try SSE first
+  connectSSE();
 
   // Uptime counter
   setInterval(() => {
