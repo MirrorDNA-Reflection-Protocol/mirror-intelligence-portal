@@ -1,7 +1,7 @@
 {
     "meta": {
         "date": "Wednesday, January 07, 2026",
-        "generated": "2026-01-07T05:49:50.988406Z"
+        "generated": "2026-01-07T06:25:57.141353Z"
     },
     "briefing": {
         "headline": "Daily Intelligence Brief",
@@ -14,8 +14,8 @@
         "sections": {
             "changed": [
                 {
-                    "text": "OpenAI Launches GPT Image 1.5",
-                    "detail": "OpenAI\u2019s new image generator enables detailed conversational image editing.",
+                    "text": "OpenAI releases GPT Image 1.5 for detailed image editing",
+                    "detail": "The tool enables advanced conversational image manipulation, raising concerns about synthetic media creation.",
                     "source": {
                         "n": 1,
                         "name": "Ars Technica",
@@ -27,10 +27,23 @@
                     "priority": null
                 },
                 {
-                    "text": "Qwen Model Runs on Raspberry Pi",
-                    "detail": "A 30B Qwen model operates in real-time on a Raspberry Pi.",
+                    "text": "Browser extensions harvest AI conversation data",
+                    "detail": "Chromium extensions collect extended AI chat histories, sparking privacy and data security debates.",
                     "source": {
                         "n": 2,
+                        "name": "Ars Technica",
+                        "url": null,
+                        "tier": 1
+                    },
+                    "voice": "gpt",
+                    "severity": null,
+                    "priority": null
+                },
+                {
+                    "text": "Microsoft disrupts Snapdragon Dev Kit access",
+                    "detail": "A developer claims Microsoft\u2019s actions halted their Snapdragon hardware development, impacting edge AI innovation.",
+                    "source": {
+                        "n": 3,
                         "name": "Hacker News",
                         "url": null,
                         "tier": 1
@@ -40,24 +53,11 @@
                     "priority": null
                 },
                 {
-                    "text": "Browser Extensions Harvest AI Conversations",
-                    "detail": "Chromium extensions collect extended AI conversation data over months.",
-                    "source": {
-                        "n": 3,
-                        "name": "Ars Technica",
-                        "url": null,
-                        "tier": 1
-                    },
-                    "voice": "gpt",
-                    "severity": null,
-                    "priority": null
-                },
-                {
-                    "text": "Cond\u00e9 Nast Data Breach Exposes User Database",
-                    "detail": "A major breach compromised Cond\u00e9 Nast\u2019s user data, though Ars users remain unaffected.",
+                    "text": "Qwen 30B model runs on Raspberry Pi",
+                    "detail": "A large language model achieves real-time performance on low-cost hardware, signaling advancements in edge computing.",
                     "source": {
                         "n": 4,
-                        "name": "Ars Technica",
+                        "name": "Hacker News",
                         "url": null,
                         "tier": 1
                     },
@@ -66,8 +66,8 @@
                     "priority": null
                 },
                 {
-                    "text": "Microsoft Disables Snapdragon Dev Kit",
-                    "detail": "Microsoft\u2019s actions disrupted a developer\u2019s Snapdragon Dev Kit, raising concerns about hardware support policies.",
+                    "text": "Trans flag emoji standardized as 5-codepoint sequence",
+                    "detail": "The emoji\u2019s design choice reflects technical constraints and cultural considerations in Unicode standardization.",
                     "source": {
                         "n": 5,
                         "name": "Hacker News",
@@ -80,11 +80,28 @@
                 }
             ],
             "matters": [],
-            "risks": [],
+            "risks": [
+                {
+                    "text": "Long-term data harvesting by browser extensions",
+                    "detail": null,
+                    "source": null,
+                    "voice": "mistral",
+                    "severity": "high",
+                    "priority": null
+                },
+                {
+                    "text": "Corporate hardware obsolescence undermining developer ecosystems",
+                    "detail": null,
+                    "source": null,
+                    "voice": "mistral",
+                    "severity": "medium",
+                    "priority": null
+                }
+            ],
             "actions": [],
             "ignore": [
                 {
-                    "text": "OpenAI\u2019s GPT Image 1.5 hype",
+                    "text": "OpenAI\u2019s GPT Image 1.5",
                     "detail": null,
                     "source": null,
                     "voice": "groq",
