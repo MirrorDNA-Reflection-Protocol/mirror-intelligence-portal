@@ -13,6 +13,8 @@ let EVENT_SOURCE = null;
 let ENGINE_PHASE = 'idle';
 let ACTIVITY_LOG = [];
 let COMMAND_PALETTE_OPEN = false;
+let VIEW_MODE = 'overview'; // 'overview' | 'forecasts' | 'beliefs' | 'risks' | 'ledger'
+let FOCUS_ITEM = null; // ID of focused item for detail view
 
 // User Memory (localStorage)
 const USER_MEMORY_KEY = 'mirror_intelligence_user';
@@ -83,18 +85,169 @@ function closeCommandPalette() {
 function renderShell() {
   const app = document.getElementById('app');
   app.innerHTML = `
-    <!-- PLANE 1: SIGNAL FIELD -->
-    ${renderSignalField()}
-    
-    <div id="content-area">
-      <div class="idle-surface">
-        <div class="idle-breathing"></div>
-        <div class="idle-status">⟡ CONNECTING TO TRUTH ENGINE</div>
+    <div class="app-shell">
+      <!-- NAVIGATION RAIL -->
+      ${renderNavRail()}
+      
+      <!-- MAIN CONTENT -->
+      <div class="main-content">
+        <!-- SIGNAL FIELD -->
+        ${renderSignalField()}
+        
+        <div id="content-area">
+          <div class="idle-surface">
+            <div class="idle-breathing"></div>
+            <div class="idle-status">⟡ CONNECTING TO TRUTH ENGINE</div>
+          </div>
+        </div>
+        
+        ${renderFooter()}
+      </div>
+      
+      <!-- FOCUS VIEW (slide-in) -->
+      <div class="focus-view" id="focus-view">
+        <div class="focus-header">
+          <button class="focus-back" onclick="closeFocusView()">← Back</button>
+          <span class="focus-title" id="focus-title">DETAIL</span>
+        </div>
+        <div class="focus-content" id="focus-content"></div>
       </div>
     </div>
-    
-    ${renderFooter()}
   `;
+}
+
+function renderNavRail() {
+  const items = [
+    { id: 'overview', icon: '⟡', label: 'Hub' },
+    { id: 'forecasts', icon: '🔮', label: 'Forecasts' },
+    { id: 'beliefs', icon: '🧩', label: 'Beliefs' },
+    { id: 'risks', icon: '⚠️', label: 'Risks' },
+    { id: 'ledger', icon: '📜', label: 'Ledger' },
+  ];
+
+  return `
+    <nav class="nav-rail">
+      <div class="nav-brand">⟡</div>
+      <div class="nav-items">
+        ${items.map(item => `
+          <a class="nav-item ${VIEW_MODE === item.id ? 'active' : ''}" 
+             onclick="setView('${item.id}')" 
+             data-view="${item.id}">
+            <span class="nav-icon">${item.icon}</span>
+            <span class="nav-label">${item.label}</span>
+          </a>
+        `).join('')}
+      </div>
+      <div class="nav-spacer"></div>
+      <div class="nav-items">
+        <a class="nav-item" onclick="toggleCommandPalette()">
+          <span class="nav-icon">⌘</span>
+          <span class="nav-label">CMD</span>
+        </a>
+      </div>
+    </nav>
+  `;
+}
+
+function setView(mode) {
+  VIEW_MODE = mode;
+  FOCUS_ITEM = null;
+
+  // Update nav rail active state
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.view === mode);
+  });
+
+  // Re-render content
+  render();
+}
+
+function openFocusView(type, id, title) {
+  FOCUS_ITEM = { type, id };
+  const focusView = document.getElementById('focus-view');
+  const focusTitle = document.getElementById('focus-title');
+  const focusContent = document.getElementById('focus-content');
+
+  if (focusView) {
+    focusTitle.textContent = title || type.toUpperCase();
+    focusContent.innerHTML = renderFocusContent(type, id);
+    focusView.classList.add('open');
+  }
+}
+
+function closeFocusView() {
+  FOCUS_ITEM = null;
+  const focusView = document.getElementById('focus-view');
+  if (focusView) focusView.classList.remove('open');
+}
+
+function renderFocusContent(type, id) {
+  if (type === 'forecast') {
+    const forecast = MIND?.forecasts?.find(f => f.id === id);
+    if (!forecast) return '<p>Forecast not found</p>';
+
+    return `
+      <div class="reading-text">
+        <div style="display: flex; align-items: baseline; gap: var(--gap-lg); margin-bottom: var(--gap-xl);">
+          <span style="font-family: var(--font-mono); font-size: 3rem; font-weight: 600; color: var(--text-primary);">
+            ${Math.round(forecast.probability * 100)}%
+          </span>
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: ${forecast.status === 'open' ? 'var(--signal-uncertain)' : 'var(--signal-confidence)'}; text-transform: uppercase;">
+            ${forecast.status}
+          </span>
+        </div>
+        
+        <h2>${forecast.question}</h2>
+        
+        <h3>Resolution Criteria</h3>
+        <p>${forecast.resolution_criteria || 'No specific criteria defined.'}</p>
+        
+        <h3>Resolution Date</h3>
+        <p>${formatDate(forecast.resolution_date)}</p>
+        
+        ${forecast.rationale ? `
+          <h3>Rationale</h3>
+          <p>${forecast.rationale}</p>
+        ` : ''}
+        
+        <div style="margin-top: var(--gap-xl); padding-top: var(--gap-lg); border-top: var(--border-soft);">
+          <p style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-ghost);">
+            Last updated ${formatTimeAgo(forecast.updated_at || MIND?.stats?.last_updated)}
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  if (type === 'belief') {
+    const belief = MIND?.beliefs?.find(b => b.id === id);
+    if (!belief) return '<p>Belief not found</p>';
+
+    return `
+      <div class="reading-text">
+        <div style="display: flex; align-items: center; gap: var(--gap-md); margin-bottom: var(--gap-xl);">
+          <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--signal-confidence); text-transform: uppercase;">
+            ${belief.confidence || 'ACTIVE'}
+          </span>
+        </div>
+        
+        <h2>${belief.belief}</h2>
+        
+        ${belief.evidence ? `
+          <h3>Supporting Evidence</h3>
+          <p>${belief.evidence}</p>
+        ` : ''}
+        
+        ${belief.since ? `
+          <p style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-ghost); margin-top: var(--gap-xl);">
+            Held since ${formatDate(belief.since)}
+          </p>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  return '<p>Content not available</p>';
 }
 
 function renderSignalField() {
@@ -354,11 +507,37 @@ function render() {
   const content = document.getElementById('content-area');
   if (!content) return;
 
-  // SPATIAL HUB ARCHITECTURE
+  // VIEW-BASED CONTENT
+  let viewContent = '';
+
+  switch (VIEW_MODE) {
+    case 'forecasts':
+      viewContent = renderForecastsView();
+      break;
+    case 'beliefs':
+      viewContent = renderBeliefsView();
+      break;
+    case 'risks':
+      viewContent = renderRisksView();
+      break;
+    case 'ledger':
+      viewContent = renderLedgerView();
+      break;
+    default: // 'overview'
+      viewContent = renderOverviewView();
+  }
+
   content.innerHTML = `
-    <!-- COMMAND PALETTE (Hidden until ⌘K) -->
     ${renderCommandPalette()}
-    
+    ${viewContent}
+  `;
+
+  attachEventListeners();
+  updateThinkingCoreState();
+}
+
+function renderOverviewView() {
+  return `
     <!-- HUB GRID: 3 COLUMNS -->
     <div class="hub-container">
       
@@ -382,27 +561,210 @@ function render() {
       
     </div>
     
-    <!-- COMMIT SURFACE (Bottom) -->
+    <!-- COMMIT SURFACE (Bottom) - Summaries only -->
     <div class="commit-surface">
       <div class="commit-header">⟡ CRYSTALLIZED TRUTH</div>
-      ${renderForecasts()}
-      ${renderBeliefs()}
-      ${renderRisks()}
-      ${renderLedger()}
+      ${renderForecastsSummary()}
+      ${renderBeliefsSummary()}
+      ${renderRisksSummary()}
     </div>
   `;
+}
 
-  attachEventListeners();
-  updateThinkingCoreState();
+function renderForecastsView() {
+  const forecasts = MIND?.forecasts || [];
+  const open = forecasts.filter(f => f.status === 'open');
+  const resolved = forecasts.filter(f => f.status === 'resolved');
+
+  return `
+    <div style="max-width: 800px; margin: 0 auto; padding: var(--gap-xl) var(--gap-lg);">
+      <div class="section-header">OPEN FORECASTS (${open.length})</div>
+      <div class="summary-list">
+        ${open.map(f => `
+          <div class="summary-card" onclick="openFocusView('forecast', '${f.id}', '${f.question.substring(0, 30)}...')">
+            <div class="summary-metric">${Math.round(f.probability * 100)}%</div>
+            <div class="summary-body">
+              <div class="summary-title">${f.question}</div>
+              <div class="summary-meta">
+                <span>Resolves ${formatDate(f.resolution_date)}</span>
+                <span>Updated ${formatTimeAgo(f.updated_at)}</span>
+              </div>
+            </div>
+            <span class="summary-arrow">→</span>
+          </div>
+        `).join('')}
+      </div>
+      
+      ${resolved.length > 0 ? `
+        <div class="section-header" style="margin-top: var(--gap-xl);">RESOLVED (${resolved.length})</div>
+        <div class="summary-list">
+          ${resolved.slice(0, 5).map(f => `
+            <div class="summary-card" onclick="openFocusView('forecast', '${f.id}', 'Resolved')">
+              <div class="summary-metric" style="color: ${f.outcome ? 'var(--signal-confidence)' : 'var(--signal-challenge)'};">
+                ${f.outcome ? '✓' : '✗'}
+              </div>
+              <div class="summary-body">
+                <div class="summary-title">${f.question}</div>
+                <div class="summary-meta">
+                  <span>Brier: ${f.brier_score?.toFixed(3) || 'N/A'}</span>
+                </div>
+              </div>
+              <span class="summary-arrow">→</span>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderBeliefsView() {
+  const beliefs = MIND?.beliefs || [];
+
+  return `
+    <div style="max-width: 800px; margin: 0 auto; padding: var(--gap-xl) var(--gap-lg);">
+      <div class="section-header">LIVING BELIEFS (${beliefs.length})</div>
+      <div class="summary-list">
+        ${beliefs.map(b => `
+          <div class="summary-card" onclick="openFocusView('belief', '${b.id}', 'Belief')">
+            <div class="summary-metric" style="font-size: 0.7rem; color: var(--signal-confidence);">${b.confidence || 'ACTIVE'}</div>
+            <div class="summary-body">
+              <div class="summary-title">${b.belief}</div>
+              ${b.since ? `<div class="summary-meta"><span>Since ${formatDate(b.since)}</span></div>` : ''}
+            </div>
+            <span class="summary-arrow">→</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderRisksView() {
+  const risks = MIND?.risks || [];
+
+  return `
+    <div style="max-width: 800px; margin: 0 auto; padding: var(--gap-xl) var(--gap-lg);">
+      <div class="section-header">ACTIVE RISKS (${risks.length})</div>
+      <div class="summary-list">
+        ${risks.map(r => `
+          <div class="summary-card">
+            <div class="summary-metric" style="font-size: 0.7rem; color: ${r.severity === 'high' ? 'var(--signal-challenge)' : r.severity === 'medium' ? 'var(--signal-uncertain)' : 'var(--text-muted)'};">
+              ${r.severity?.toUpperCase() || 'UNKNOWN'}
+            </div>
+            <div class="summary-body">
+              <div class="summary-title">${r.risk}</div>
+              ${r.since ? `<div class="summary-meta"><span>Surfaced ${formatDate(r.since)}</span></div>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderLedgerView() {
+  const entries = MIND?.ledger?.entries || [];
+
+  return `
+    <div style="max-width: 800px; margin: 0 auto; padding: var(--gap-xl) var(--gap-lg);">
+      <div class="section-header">TRUTH LEDGER (${entries.length} entries)</div>
+      <div style="font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-ghost); margin-bottom: var(--gap-lg);">
+        Append-only. No edits. No deletions.
+      </div>
+      ${entries.slice(0, 30).map(e => `
+        <div style="display: flex; gap: var(--gap-md); padding: var(--gap-sm) 0; border-bottom: 1px solid rgba(74, 85, 104, 0.2); font-size: 0.85rem;">
+          <span style="font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-ghost); min-width: 60px;">${e.hash?.substring(0, 8) || '...'}</span>
+          <span style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); min-width: 100px;">${formatTime(e.timestamp)}</span>
+          <span style="color: var(--text-body); flex-grow: 1;">${e.content}</span>
+          <span style="font-family: var(--font-mono); font-size: 0.5rem; color: var(--text-ghost); text-transform: uppercase;">${e.type}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderForecastsSummary() {
+  const forecasts = MIND?.forecasts?.filter(f => f.status === 'open')?.slice(0, 3) || [];
+
+  return `
+    <div class="section-collapsible">
+      <div class="section-trigger" onclick="setView('forecasts')">
+        <span class="section-header" style="margin: 0;">FORECASTS (${forecasts.length}+)</span>
+        <span class="section-toggle">View all →</span>
+      </div>
+      <div class="summary-list">
+        ${forecasts.map(f => `
+          <div class="summary-card" onclick="openFocusView('forecast', '${f.id}', '${f.question.substring(0, 30)}...')">
+            <div class="summary-metric">${Math.round(f.probability * 100)}%</div>
+            <div class="summary-body">
+              <div class="summary-title">${f.question}</div>
+            </div>
+            <span class="summary-arrow">→</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderBeliefsSummary() {
+  const beliefs = MIND?.beliefs?.slice(0, 2) || [];
+
+  return `
+    <div class="section-collapsible">
+      <div class="section-trigger" onclick="setView('beliefs')">
+        <span class="section-header" style="margin: 0;">BELIEFS (${beliefs.length}+)</span>
+        <span class="section-toggle">View all →</span>
+      </div>
+      <div class="summary-list">
+        ${beliefs.map(b => `
+          <div class="summary-card" onclick="openFocusView('belief', '${b.id}', 'Belief')">
+            <div class="summary-metric" style="font-size: 0.7rem; color: var(--signal-confidence);">${b.confidence || '•'}</div>
+            <div class="summary-body">
+              <div class="summary-title">${b.belief}</div>
+            </div>
+            <span class="summary-arrow">→</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderRisksSummary() {
+  const risks = MIND?.risks?.slice(0, 2) || [];
+
+  if (risks.length === 0) return '';
+
+  return `
+    <div class="section-collapsible">
+      <div class="section-trigger" onclick="setView('risks')">
+        <span class="section-header" style="margin: 0;">RISKS (${risks.length})</span>
+        <span class="section-toggle">View all →</span>
+      </div>
+      <div class="summary-list">
+        ${risks.map(r => `
+          <div class="summary-card">
+            <div class="summary-metric" style="font-size: 0.7rem; color: var(--signal-challenge);">${r.severity || '!'}</div>
+            <div class="summary-body">
+              <div class="summary-title">${r.risk}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
 }
 
 function renderCommandPalette() {
   const commands = [
-    { icon: '⟡', text: 'Request new analysis', hint: 'deliberate', action: 'triggerDeliberation()' },
-    { icon: '🔍', text: 'Search forecasts', hint: 'search', action: '' },
-    { icon: '📊', text: 'Show belief changes', hint: 'changes', action: '' },
-    { icon: '⚠️', text: 'View active risks', hint: 'risks', action: '' },
-    { icon: '📜', text: 'Open ledger', hint: 'ledger', action: '' },
+    { icon: '⟡', text: 'Request new analysis', hint: 'deliberate', action: 'executeCommand("deliberate")' },
+    { icon: '🔮', text: 'View all forecasts', hint: 'forecasts', action: 'executeCommand("forecasts")' },
+    { icon: '🧩', text: 'View beliefs', hint: 'beliefs', action: 'executeCommand("beliefs")' },
+    { icon: '⚠️', text: 'View active risks', hint: 'risks', action: 'executeCommand("risks")' },
+    { icon: '📜', text: 'Open ledger', hint: 'ledger', action: 'executeCommand("ledger")' },
+    { icon: '⟡', text: 'Return to hub', hint: 'hub', action: 'executeCommand("hub")' },
   ];
 
   return `
@@ -410,12 +772,12 @@ function renderCommandPalette() {
       <div class="command-palette">
         <div class="command-input-wrapper">
           <span class="command-icon">⟡</span>
-          <input type="text" class="command-input" placeholder="What would you like to do?" autofocus>
+          <input type="text" class="command-input" placeholder="What would you like to do?" autofocus onkeyup="filterCommands(event)">
           <span class="command-shortcut">esc</span>
         </div>
-        <div class="command-results">
+        <div class="command-results" id="command-results">
           ${commands.map((c, i) => `
-            <div class="command-item ${i === 0 ? 'selected' : ''}" onclick="${c.action}">
+            <div class="command-item ${i === 0 ? 'selected' : ''}" onclick="${c.action}" data-hint="${c.hint}">
               <span class="command-item-icon">${c.icon}</span>
               <span class="command-item-text">${c.text}</span>
               <span class="command-item-hint">${c.hint}</span>
@@ -425,6 +787,51 @@ function renderCommandPalette() {
       </div>
     </div>
   `;
+}
+
+function executeCommand(cmd) {
+  closeCommandPalette();
+
+  switch (cmd) {
+    case 'deliberate':
+      triggerDeliberation();
+      break;
+    case 'forecasts':
+      setView('forecasts');
+      break;
+    case 'beliefs':
+      setView('beliefs');
+      break;
+    case 'risks':
+      setView('risks');
+      break;
+    case 'ledger':
+      setView('ledger');
+      break;
+    case 'hub':
+      setView('overview');
+      break;
+    default:
+      console.log('Unknown command:', cmd);
+  }
+}
+
+function filterCommands(event) {
+  const query = event.target.value.toLowerCase();
+  const items = document.querySelectorAll('.command-item');
+
+  items.forEach(item => {
+    const hint = item.dataset.hint.toLowerCase();
+    const text = item.querySelector('.command-item-text').textContent.toLowerCase();
+    const match = hint.includes(query) || text.includes(query);
+    item.style.display = match ? 'flex' : 'none';
+  });
+
+  // Handle Enter key - execute first visible command
+  if (event.key === 'Enter') {
+    const visible = Array.from(items).find(i => i.style.display !== 'none');
+    if (visible) visible.click();
+  }
 }
 
 function renderThinkingCore() {
