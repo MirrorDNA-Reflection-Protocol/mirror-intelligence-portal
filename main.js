@@ -550,38 +550,264 @@ function render() {
 }
 
 function renderOverviewView() {
+  const date = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+  const status = ENGINE_PHASE === 'idle' ? 'Monitoring' : ENGINE_PHASE;
+
   return `
-    <!-- HUB GRID: 3 COLUMNS -->
-    <div class="hub-container">
+    <div class="daily-brief-container">
       
-      <!-- LEFT RAIL: Inputs & Commands -->
-      <div class="left-rail">
-        ${renderAskEngine()}
-        ${renderExampleQuestions()}
-        ${renderUserMemory()}
+      <!-- DAILY INTELLIGENCE BRIEF HEADER -->
+      <header class="brief-header">
+        <div class="brief-title">Daily Intelligence Brief</div>
+        <div class="brief-meta">
+          <span class="brief-date">${date}</span>
+          <span class="brief-status ${ENGINE_PHASE}">${status}</span>
+        </div>
+      </header>
+      
+      <!-- EXECUTIVE JUDGMENT -->
+      ${renderExecutiveJudgment()}
+      
+      <!-- WHAT CHANGED -->
+      ${renderWhatChanged()}
+      
+      <!-- WHY IT MATTERS -->
+      ${renderWhyItMatters()}
+      
+      <!-- FORECAST MOVES -->
+      ${renderForecastMoves()}
+      
+      <!-- ASSUMPTION UNDER STRESS -->
+      ${renderAssumptionUnderStress()}
+      
+      <!-- WHAT TO WATCH NEXT -->
+      ${renderWhatToWatch()}
+      
+      <!-- SYSTEM NOTE -->
+      <div class="system-note">
+        ${ENGINE_PHASE === 'idle'
+      ? 'No active deliberation. Engine in monitoring mode.'
+      : `Engine currently ${ENGINE_PHASE}. Analysis will update when complete.`}
+        <button class="request-brief-btn" onclick="triggerDeliberation()">⟡ Request New Analysis</button>
       </div>
       
-      <!-- CENTER: THINKING CORE (Sticky) -->
-      <div class="thinking-core" id="thinking-core">
-        ${renderThinkingCore()}
+      <!-- EXPANDABLE DRILL-DOWN SECTIONS -->
+      <div class="drill-down-sections">
+        <details class="drill-down">
+          <summary>View All Forecasts (${MIND?.forecasts?.filter(f => f.status === 'open').length || 0} open)</summary>
+          ${renderForecastsSummary()}
+        </details>
+        
+        <details class="drill-down">
+          <summary>View Beliefs (${MIND?.beliefs?.length || 0})</summary>
+          ${renderBeliefsSummary()}
+        </details>
+        
+        <details class="drill-down">
+          <summary>View Source Ledger (${Array.isArray(MIND?.ledger) ? MIND.ledger.length : 0} entries)</summary>
+          <div class="ledger-preview">
+            ${renderLedgerPreview()}
+          </div>
+        </details>
       </div>
       
-      <!-- RIGHT RAIL: Live State -->
-      <div class="right-rail">
-        ${renderLiveStateRail()}
-        ${renderDeltasRail()}
-      </div>
-      
-    </div>
-    
-    <!-- COMMIT SURFACE (Bottom) - Summaries only -->
-    <div class="commit-surface">
-      <div class="commit-header">⟡ CRYSTALLIZED TRUTH</div>
-      ${renderForecastsSummary()}
-      ${renderBeliefsSummary()}
-      ${renderRisksSummary()}
     </div>
   `;
+}
+
+function renderExecutiveJudgment() {
+  const judgment = MIND?.update?.matters ||
+    'Awaiting analysis. Request a new deliberation to generate executive judgment.';
+
+  return `
+    <section class="brief-section">
+      <h2 class="section-label">Executive Judgment</h2>
+      <p class="judgment-text">${judgment}</p>
+    </section>
+  `;
+}
+
+function renderWhatChanged() {
+  const deltas = MIND?.deltas || [];
+  const recentDeltas = deltas.slice(0, 5);
+
+  if (recentDeltas.length === 0) {
+    return `
+      <section class="brief-section">
+        <h2 class="section-label">What Changed</h2>
+        <p class="no-data">No significant changes detected in this cycle.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="brief-section">
+      <h2 class="section-label">What Changed</h2>
+      <ul class="change-list">
+        ${recentDeltas.map(d => `
+          <li class="change-item">
+            <span class="change-icon">${d.valence === 'positive' ? '↑' : d.valence === 'negative' ? '↓' : '•'}</span>
+            <span class="change-text">${d.summary || d.text || 'Signal detected'}</span>
+          </li>
+        `).join('')}
+      </ul>
+    </section>
+  `;
+}
+
+function renderWhyItMatters() {
+  const confidence = MIND?.update?.confidence ||
+    'The dominant pattern remains unclear. Further analysis required to establish significance.';
+
+  return `
+    <section class="brief-section">
+      <h2 class="section-label">Why It Matters</h2>
+      <p class="matters-text">${confidence}</p>
+    </section>
+  `;
+}
+
+function renderForecastMoves() {
+  const forecasts = MIND?.forecasts || [];
+
+  // Find forecasts with probability changes (would need history in data)
+  // For now, show forecasts by recency as proxy
+  const recentForecasts = forecasts
+    .filter(f => f.status === 'open')
+    .slice(0, 3);
+
+  // Check if any have history with changes
+  const moves = recentForecasts.filter(f => f.history && f.history.length > 1);
+
+  if (moves.length === 0) {
+    return `
+      <section class="brief-section forecast-moves">
+        <h2 class="section-label">Forecast Moves</h2>
+        <p class="no-moves">No material confidence changes recorded this cycle.</p>
+        <p class="no-moves-note">This reflects insufficient new evidence, not increased certainty.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="brief-section forecast-moves">
+      <h2 class="section-label">Forecast Moves</h2>
+      <div class="moves-list">
+        ${moves.map(f => {
+    const prev = f.history[f.history.length - 2]?.value || f.probability;
+    const curr = f.probability;
+    const change = curr - prev;
+    return `
+            <div class="move-item">
+              <div class="move-question">${f.question}</div>
+              <div class="move-change ${change > 0 ? 'up' : change < 0 ? 'down' : 'flat'}">
+                ${Math.round(prev * 100)}% → ${Math.round(curr * 100)}%
+              </div>
+            </div>
+          `;
+  }).join('')}
+      </div>
+    </section>
+  `;
+}
+
+function renderAssumptionUnderStress() {
+  const beliefs = MIND?.beliefs || [];
+
+  if (beliefs.length === 0) {
+    return `
+      <section class="brief-section assumption-stress">
+        <h2 class="section-label">Assumption Under Stress</h2>
+        <p class="no-data">No beliefs loaded for stress analysis.</p>
+      </section>
+    `;
+  }
+
+  // Find the belief with lowest confidence or 'weakening' status
+  const stressed = beliefs.reduce((weakest, b) => {
+    if (!weakest) return b;
+    if (b.status === 'weakening') return b;
+    if (b.confidence < weakest.confidence) return b;
+    return weakest;
+  }, null);
+
+  if (!stressed) return '';
+
+  return `
+    <section class="brief-section assumption-stress">
+      <h2 class="section-label">Assumption Under Stress</h2>
+      
+      <div class="stress-assumption">
+        <div class="stress-label">Assumption:</div>
+        <p class="stress-text">"${stressed.statement}"</p>
+      </div>
+      
+      <div class="stress-signals">
+        <div class="stress-label">Stress Signals:</div>
+        <ul>
+          ${stressed.evidence_against ? `<li>${stressed.evidence_against}</li>` : ''}
+          ${stressed.status === 'weakening' ? '<li>Confidence declining over recent cycles</li>' : ''}
+          <li>Current confidence: ${stressed.confidence}%</li>
+        </ul>
+      </div>
+      
+      <div class="stress-evidence">
+        <div class="stress-label">What Would Confirm:</div>
+        <p>${stressed.evidence_for || 'Demonstrable improvement in relevant metrics'}</p>
+        
+        <div class="stress-label">What Would Break It:</div>
+        <p>${stressed.evidence_against || 'Evidence of accelerating contrary trends'}</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderWhatToWatch() {
+  const risks = MIND?.risks || [];
+  const upcomingForecasts = (MIND?.forecasts || [])
+    .filter(f => f.status === 'open')
+    .slice(0, 2);
+
+  const watchItems = [
+    ...risks.slice(0, 2).map(r => r.risk),
+    ...upcomingForecasts.map(f => `Resolution window for: ${f.question.substring(0, 60)}...`)
+  ].slice(0, 3);
+
+  if (watchItems.length === 0) {
+    return `
+      <section class="brief-section">
+        <h2 class="section-label">What to Watch Next</h2>
+        <p class="no-data">No specific items flagged for monitoring.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="brief-section">
+      <h2 class="section-label">What to Watch Next</h2>
+      <ul class="watch-list">
+        ${watchItems.map(item => `<li>${item}</li>`).join('')}
+      </ul>
+    </section>
+  `;
+}
+
+function renderLedgerPreview() {
+  const entries = Array.isArray(MIND?.ledger) ? MIND.ledger.slice(0, 5) : [];
+
+  if (entries.length === 0) {
+    return '<p class="no-data">No ledger entries.</p>';
+  }
+
+  return entries.map(e => `
+    <div class="ledger-entry-preview">
+      <span class="ledger-time">${e.timestamp?.substring(0, 16) || ''}</span>
+      <span class="ledger-type">${e.type}</span>
+      <span class="ledger-preview-text">${e.payload?.question || e.payload?.id || '...'}</span>
+    </div>
+  `).join('');
 }
 
 function renderForecastsView() {
