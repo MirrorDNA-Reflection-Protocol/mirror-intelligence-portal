@@ -664,7 +664,19 @@ function renderRisksView() {
 }
 
 function renderLedgerView() {
-  const entries = MIND?.ledger?.entries || [];
+  // Ledger is an array, not {entries: []}
+  const entries = Array.isArray(MIND?.ledger) ? MIND.ledger : [];
+
+  if (entries.length === 0) {
+    return `
+      <div style="max-width: 800px; margin: 0 auto; padding: var(--gap-xl) var(--gap-lg);">
+        <div class="section-header">TRUTH LEDGER</div>
+        <div style="color: var(--text-ghost); padding: var(--gap-xl); text-align: center;">
+          No ledger entries yet. Run a deliberation to generate entries.
+        </div>
+      </div>
+    `;
+  }
 
   return `
     <div style="max-width: 800px; margin: 0 auto; padding: var(--gap-xl) var(--gap-lg);">
@@ -674,10 +686,10 @@ function renderLedgerView() {
       </div>
       ${entries.slice(0, 30).map(e => `
         <div style="display: flex; gap: var(--gap-md); padding: var(--gap-sm) 0; border-bottom: 1px solid rgba(74, 85, 104, 0.2); font-size: 0.85rem;">
-          <span style="font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-ghost); min-width: 60px;">${e.hash?.substring(0, 8) || '...'}</span>
-          <span style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); min-width: 100px;">${formatTime(e.timestamp)}</span>
-          <span style="color: var(--text-body); flex-grow: 1;">${e.content}</span>
-          <span style="font-family: var(--font-mono); font-size: 0.5rem; color: var(--text-ghost); text-transform: uppercase;">${e.type}</span>
+          <span style="font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-ghost); min-width: 80px;">${e.id?.substring(0, 8) || '...'}</span>
+          <span style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); min-width: 140px;">${e.timestamp?.substring(0, 19) || ''}</span>
+          <span style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--signal-info); min-width: 120px;">${e.type}</span>
+          <span style="color: var(--text-body); flex-grow: 1; font-size: 0.8rem;">${e.payload?.question || e.payload?.id || JSON.stringify(e.payload || {}).substring(0, 80)}...</span>
         </div>
       `).join('')}
     </div>
@@ -1064,8 +1076,18 @@ function renderChangesSummary() {
 }
 
 function showExampleResponse(question) {
-  // For now, trigger deliberation
-  console.log('Example question:', question);
+  // Show a toast/feedback and trigger deliberation
+  const core = document.getElementById('thinking-core');
+  if (core) {
+    core.classList.add('deliberating');
+    core.querySelector('.core-signal').textContent = `Analyzing: "${question}"`;
+  }
+
+  // Record in user memory
+  const mem = getUserMemory();
+  mem.questionsAsked.push({ question, time: new Date().toISOString() });
+  saveUserMemory(mem);
+
   triggerDeliberation();
 }
 
@@ -1658,10 +1680,31 @@ async function triggerRefresh() {
 }
 
 async function triggerDeliberation() {
+  // Visual feedback
+  const core = document.getElementById('thinking-core');
+  const btn = document.querySelector('.ask-engine-btn');
+
+  if (core) core.classList.add('deliberating');
+  if (btn) {
+    btn.textContent = '⟡ Deliberating...';
+    btn.disabled = true;
+  }
+
   try {
-    await fetch(`${API_BASE}/api/deliberate`, { method: 'POST' });
+    const res = await fetch(`${API_BASE}/api/deliberate`, { method: 'POST' });
+    if (res.ok) {
+      // Reload data after deliberation
+      await loadMind();
+      render();
+    }
   } catch (e) {
     console.error("Deliberation failed:", e);
+  } finally {
+    if (core) core.classList.remove('deliberating');
+    if (btn) {
+      btn.textContent = '⟡ Request Analysis';
+      btn.disabled = false;
+    }
   }
 }
 
