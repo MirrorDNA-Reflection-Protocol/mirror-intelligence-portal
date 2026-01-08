@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Debug Test</title>
+</head>
+
+<body>
+    <h1>Button Test</h1>
+    <button onclick="testClick()">Click Me</button>
+    <button onclick="testDeliberation()">Test Deliberation</button>
+    <div id="output"></div>
+
+    <script type="module">
+        // Expose functions to window
+        window.testClick = function () {
+            document.getElementById('output').innerHTML += '<p>Click worked!</p>';
+        };
+
+        window.testDeliberation = async function () {
+            document.getElementById('output').innerHTML += '<p>Calling /api/deliberate...</p>';
+            try {
+                const res = await fetch('/api/deliberate', { method: 'POST' });
+                const data = await res.json();
+                document.getElementById('output').innerHTML += '<p>Result: ' + JSON.stringify(data) + '</p>';
+            } catch (e) {
+                document.getElementById('output').innerHTML += '<p>Error: ' + e.message + '</p>';
+            }
+        };
+    </script>
+</body>
+
+</html>

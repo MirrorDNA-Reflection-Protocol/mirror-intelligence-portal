@@ -344,6 +344,14 @@ async def serve_main_js():
         return FileResponse(js_path, media_type="application/javascript")
     raise HTTPException(404, "main.js not found")
 
+@app.get("/test.html")
+async def serve_test_html():
+    """Serve test page for debugging."""
+    test_path = STATIC_DIR / "test.html"
+    if test_path.exists():
+        return FileResponse(test_path, media_type="text/html")
+    raise HTTPException(404, "test.html not found")
+
 @app.get("/index.css")
 async def serve_index_css():
     """Serve the main CSS file."""

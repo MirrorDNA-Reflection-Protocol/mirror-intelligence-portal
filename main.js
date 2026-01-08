@@ -42,6 +42,7 @@ function recordVisit() {
 
 async function init() {
   console.log("⟡ Truth Engine v4 initializing...");
+  console.log("DEBUG: window.triggerDeliberation before init:", typeof window.triggerDeliberation);
   renderShell();
   await loadMind();
   loadStatus();
@@ -49,6 +50,7 @@ async function init() {
   startPulseAnimation();
   initCommandPalette();
   recordVisit();
+  console.log("DEBUG: init complete, window.triggerDeliberation:", typeof window.triggerDeliberation);
 }
 
 function initCommandPalette() {
@@ -1888,6 +1890,12 @@ window.triggerRefresh = triggerRefresh;
 window.openForecast = openForecast;
 window.openPulse = openPulse;
 window.showExampleResponse = showExampleResponse;
+
+console.log("DEBUG: Window functions exposed:", {
+  setView: typeof window.setView,
+  triggerDeliberation: typeof window.triggerDeliberation,
+  showExampleResponse: typeof window.showExampleResponse
+});
 
 // ═══════════════════════════════════════════════════════════════
 // BOOT
