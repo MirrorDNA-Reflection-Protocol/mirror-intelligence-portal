@@ -1816,6 +1816,23 @@ function attachEventListeners() {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// EXPOSE TO WINDOW (Required for onclick handlers with ES modules)
+// ═══════════════════════════════════════════════════════════════
+
+window.setView = setView;
+window.openFocusView = openFocusView;
+window.closeFocusView = closeFocusView;
+window.executeCommand = executeCommand;
+window.filterCommands = filterCommands;
+window.toggleCommandPalette = toggleCommandPalette;
+window.closeCommandPalette = closeCommandPalette;
+window.triggerDeliberation = triggerDeliberation;
+window.triggerRefresh = triggerRefresh;
+window.openForecast = openForecast;
+window.openPulse = openPulse;
+window.showExampleResponse = showExampleResponse;
+
+// ═══════════════════════════════════════════════════════════════
 // BOOT
 // ═══════════════════════════════════════════════════════════════
 
