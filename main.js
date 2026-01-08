@@ -153,6 +153,9 @@ function setView(mode) {
   VIEW_MODE = mode;
   FOCUS_ITEM = null;
 
+  // CRITICAL: Close any open overlay before switching views
+  closeFocusView();
+
   // Update nav rail active state
   document.querySelectorAll('.nav-item').forEach(item => {
     item.classList.toggle('active', item.dataset.view === mode);
@@ -212,7 +215,7 @@ function renderFocusContent(type, id) {
         
         <div style="margin-top: var(--gap-xl); padding-top: var(--gap-lg); border-top: var(--border-soft);">
           <p style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-ghost);">
-            Last updated ${formatTimeAgo(forecast.updated_at || MIND?.stats?.last_updated)}
+            Last updated ${formatTimeAgo(forecast.created_at || MIND?.stats?.last_updated)}
           </p>
         </div>
       </div>
@@ -226,21 +229,29 @@ function renderFocusContent(type, id) {
     return `
       <div class="reading-text">
         <div style="display: flex; align-items: center; gap: var(--gap-md); margin-bottom: var(--gap-xl);">
+          <span style="font-family: var(--font-mono); font-size: 2rem; font-weight: 600; color: var(--text-primary);">
+            ${belief.confidence}%
+          </span>
           <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--signal-confidence); text-transform: uppercase;">
-            ${belief.confidence || 'ACTIVE'}
+            ${belief.status || 'ACTIVE'}
           </span>
         </div>
         
-        <h2>${belief.belief}</h2>
+        <h2>${belief.statement}</h2>
         
-        ${belief.evidence ? `
-          <h3>Supporting Evidence</h3>
-          <p>${belief.evidence}</p>
+        ${belief.evidence_for ? `
+          <h3>Evidence For</h3>
+          <p>${belief.evidence_for}</p>
         ` : ''}
         
-        ${belief.since ? `
+        ${belief.evidence_against ? `
+          <h3>Evidence Against</h3>
+          <p>${belief.evidence_against}</p>
+        ` : ''}
+        
+        ${belief.last_challenged ? `
           <p style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-ghost); margin-top: var(--gap-xl);">
-            Held since ${formatDate(belief.since)}
+            Last challenged ${belief.last_challenged}
           </p>
         ` : ''}
       </div>
@@ -587,7 +598,7 @@ function renderForecastsView() {
               <div class="summary-title">${f.question}</div>
               <div class="summary-meta">
                 <span>Resolves ${formatDate(f.resolution_date)}</span>
-                <span>Updated ${formatTimeAgo(f.updated_at)}</span>
+                <span>Updated ${formatTimeAgo(f.created_at)}</span>
               </div>
             </div>
             <span class="summary-arrow">→</span>
@@ -627,10 +638,13 @@ function renderBeliefsView() {
       <div class="summary-list">
         ${beliefs.map(b => `
           <div class="summary-card" onclick="openFocusView('belief', '${b.id}', 'Belief')">
-            <div class="summary-metric" style="font-size: 0.7rem; color: var(--signal-confidence);">${b.confidence || 'ACTIVE'}</div>
+            <div class="summary-metric" style="font-size: 1.2rem; color: var(--signal-confidence);">${b.confidence}%</div>
             <div class="summary-body">
-              <div class="summary-title">${b.belief}</div>
-              ${b.since ? `<div class="summary-meta"><span>Since ${formatDate(b.since)}</span></div>` : ''}
+              <div class="summary-title">${b.statement}</div>
+              <div class="summary-meta">
+                <span style="color: ${b.status === 'strengthening' ? 'var(--signal-confidence)' : 'var(--text-muted)'}">${b.status || 'active'}</span>
+                ${b.last_challenged ? `<span>Challenged ${b.last_challenged}</span>` : ''}
+              </div>
             </div>
             <span class="summary-arrow">→</span>
           </div>
@@ -1345,7 +1359,7 @@ function renderForecasts() {
                 <span class="forecast-status open">OPEN</span>
                 <span class="forecast-resolve-date">Resolves ${formatDate(f.resolution_date)}</span>
               </div>
-              <div class="forecast-updated">Updated ${formatTimeAgo(f.updated_at || MIND?.stats?.last_updated)}</div>
+              <div class="forecast-updated">Updated ${formatTimeAgo(f.created_at || MIND?.stats?.last_updated)}</div>
             </div>
           `).join('')}
         </div>
