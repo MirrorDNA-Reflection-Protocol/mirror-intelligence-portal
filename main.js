@@ -320,7 +320,7 @@ async function loadMind() {
 
   // Fallback
   try {
-    const resp = await fetch('/public/data.json');
+    const resp = await fetch('./data.json');
     if (resp.ok) {
       const data = await resp.json();
       if (data.mind) {
