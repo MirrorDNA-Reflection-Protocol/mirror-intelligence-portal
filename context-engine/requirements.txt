@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+feedparser
+pydantic
+httpx
+aiofiles
+sse-starlette
+python-multipart
